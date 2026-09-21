@@ -2,6 +2,8 @@ package app.morphe.extension.youtube.patches;
 
 import static app.morphe.extension.shared.StringRef.str;
 
+import static io.github.nexalloy.morphe.youtube.misc.imageurlhook.CronetImageUrlHookKt.getHookedUrl;
+
 import android.net.Uri;
 
 import androidx.annotation.GuardedBy;
@@ -403,7 +405,7 @@ public final class AlternativeThumbnailsPatch {
                                            @Nullable UrlResponseInfo responseInfo,
                                            IOException exception) {
         try {
-            String url = ((CronetUrlRequest) request).getHookedUrl();
+            String url = getHookedUrl((CronetUrlRequest) request);
             if (urlIsDeArrow(url)) {
                 Logger.printDebug(() -> "handleCronetFailure, exception: " + exception);
                 final int statusCode = (responseInfo != null)

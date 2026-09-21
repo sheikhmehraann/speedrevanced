@@ -1,4 +1,8 @@
 /*
+* Custom changes: Composition Over Inheritance
+* */
+
+/*
  * Copyright 2026 Morphe.
  * https://github.com/MorpheApp/morphe-patches
  *
@@ -32,14 +36,20 @@ import app.morphe.extension.youtube.swipecontrols.controller.gesture.PressToSwip
 import app.morphe.extension.youtube.swipecontrols.controller.gesture.core.GestureController
 import app.morphe.extension.youtube.swipecontrols.misc.Rectangle
 import app.morphe.extension.youtube.swipecontrols.views.SwipeControlsOverlayLayout
+import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XC_MethodHook.MethodHookParam
+import de.robv.android.xposed.XposedBridge
+import de.robv.android.xposed.XposedHelpers
+import io.github.libxposed.api.XposedInterface
 import java.lang.ref.WeakReference
+import java.lang.reflect.Method
 import kotlin.concurrent.Volatile
 
 /**
  * The main controller for volume and brightness swipe controls.
  * Note that the superclass is overwritten to the superclass of the MainActivity at patch time.
  */
-class SwipeControlsHostActivity : Activity() {
+class SwipeControlsHostActivity(val activity: Activity) {
     /**
      * Current instance of [AudioVolumeController].
      */
@@ -79,7 +89,7 @@ class SwipeControlsHostActivity : Activity() {
      * Current content view with id [android.R.id.content].
      */
     private val contentRoot
-        get() = window.decorView.findViewById<ViewGroup>(android.R.id.content)
+        get() = activity.window.decorView.findViewById<ViewGroup>(android.R.id.content)
 
     /**
      * Whether the status bar is visible on Android 15+ (edge-to-edge display).
@@ -87,47 +97,18 @@ class SwipeControlsHostActivity : Activity() {
     @Volatile
     var statusBarVisible: Boolean = false
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        initialize()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        reAttachOverlays()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        PlayerType.onChange -= this::onPlayerTypeChanged
-    }
-
-    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-        ensureInitialized()
-        return if ((ev != null) && gesture.submitTouchEvent(ev)) {
-            true
-        } else {
-            super.dispatchTouchEvent(ev)
-        }
-    }
-
-    override fun dispatchKeyEvent(ev: KeyEvent?): Boolean {
-        ensureInitialized()
-        return if ((ev != null) && keys.onKeyEvent(ev)) {
-            true
-        } else {
-            super.dispatchKeyEvent(ev)
-        }
-    }
-
     /**
      * Dispatches a touch event to downstream views.
      *
      * @param event The event to dispatch.
      * @return Whether the event was consumed.
      */
-    fun dispatchDownstreamTouchEvent(event: MotionEvent) =
-        super.dispatchTouchEvent(event)
+    fun dispatchDownstreamTouchEvent(event: MotionEvent): Boolean {
+        return dispatchDownstreamTouchEventMethod.invokeSpecial(
+            activity,
+            event
+        ) as Boolean
+    }
 
     /**
      * Ensures that swipe controllers are initialized and attached.
@@ -156,13 +137,13 @@ class SwipeControlsHostActivity : Activity() {
         screen = createScreenController()
 
         // create overlay
-        SwipeControlsOverlayLayout(this, config).let {
+        SwipeControlsOverlayLayout(activity, config).let {
             overlay = it
             contentRoot.addView(it)
         }
 
         // create swipe zone controller
-        zones = SwipeZonesController(this) {
+        zones = SwipeZonesController(activity) {
             Rectangle(
                 contentRoot.x.toInt(),
                 contentRoot.y.toInt(),
@@ -210,7 +191,7 @@ class SwipeControlsHostActivity : Activity() {
      * the app is pinned then, and the player it returns to is the maximized one.
      */
     val isInSplitScreenMode: Boolean
-        get() = isInMultiWindowMode && !isInPictureInPictureMode
+        get() = activity.isInMultiWindowMode && !activity.isInPictureInPictureMode
 
     // Flag that indicates whether the brightness has been saved and restored default brightness
     private var isBrightnessSaved = false
@@ -251,25 +232,25 @@ class SwipeControlsHostActivity : Activity() {
             null
         }
 
+    fun getSystemService(name: String): Any? = activity.getSystemService(name)
+
     /**
      * Creates the screen brightness controller instance.
      */
-    private fun createScreenController() =
-        if (config.enableBrightnessControl) {
-            ScreenBrightnessController(this)
-        } else {
-            null
-        }
+    private fun createScreenController() = if (config.enableBrightnessControl) {
+        ScreenBrightnessController(this)
+    } else {
+        null
+    }
 
     /**
      * Creates the gesture controller based on settings.
      */
-    private fun createGestureController() =
-        if (config.shouldEnablePressToSwipe) {
-            PressToSwipeController(this)
-        } else {
-            ClassicSwipeController(this)
-        }
+    private fun createGestureController() = if (config.shouldEnablePressToSwipe) {
+        PressToSwipeController(this)
+    } else {
+        ClassicSwipeController(this)
+    }
 
     companion object {
         private const val LOCK_MODE_OVERLAY_NAME = "player_overlay_lock_mode"
@@ -328,5 +309,85 @@ class SwipeControlsHostActivity : Activity() {
         fun allowSwipeChangeVideo(original: Boolean): Boolean =
             // Feature can cause crashing if forced in newer targets.
             !VersionCheckPatch.IS_20_22_OR_GREATER && Settings.SWIPE_CHANGE_VIDEO.get()
+
+        private val MethodHookParam.swipeControlsHost
+            get() = XposedHelpers.getAdditionalInstanceField(
+                thisObject, "swipeControlsHost"
+            ) as SwipeControlsHostActivity
+
+        private lateinit var dispatchDownstreamTouchEventMethod: XposedInterface.Invoker<*, Method?>
+
+        @JvmStatic
+        context(xposed: XposedInterface)
+        fun hookActivity(activityClass: Class<*>) {
+            XposedBridge.hookAllConstructors(activityClass, object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    val mainActivity = param.thisObject as Activity
+                    val swipeControlsHost = SwipeControlsHostActivity(mainActivity)
+                    XposedHelpers.setAdditionalInstanceField(
+                        mainActivity, "swipeControlsHost", swipeControlsHost
+                    )
+                }
+            })
+            XposedHelpers.findAndHookMethod(
+                activityClass, "onCreate", Bundle::class.java, object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        param.swipeControlsHost.apply {
+                            initialize()
+                        }
+                    }
+                })
+            XposedHelpers.findAndHookMethod(
+                activityClass, "onStart", object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        param.swipeControlsHost.reAttachOverlays()
+                    }
+                })
+            XposedHelpers.findAndHookMethod(
+                activityClass, "onDestroy", object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        PlayerType.onChange -= param.swipeControlsHost::onPlayerTypeChanged
+                    }
+                })
+            XposedHelpers.findAndHookMethod(
+                activityClass,
+                "dispatchTouchEvent",
+                MotionEvent::class.java,
+                object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        val ev = param.args[0] as MotionEvent?
+                        param.swipeControlsHost.apply {
+                            ensureInitialized()
+                            if ((ev != null) && gesture.submitTouchEvent(ev)) {
+                                param.result = true
+                            }
+                        }
+                    }
+                })
+
+            // invoke super method
+            dispatchDownstreamTouchEventMethod = xposed.getInvoker(
+                Activity::class.java.getDeclaredMethod(
+                    "dispatchTouchEvent",
+                    MotionEvent::class.java
+                )
+            )
+
+            XposedHelpers.findAndHookMethod(
+                activityClass,
+                "dispatchKeyEvent",
+                KeyEvent::class.java,
+                object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        val ev = param.args[0] as KeyEvent?
+                        param.swipeControlsHost.apply {
+                            ensureInitialized()
+                            if ((ev != null) && keys.onKeyEvent(ev)) {
+                                param.result = true
+                            }
+                        }
+                    }
+                })
+        }
     }
 }

@@ -10,6 +10,8 @@
 
 package app.morphe.extension.youtube.patches;
 
+import static io.github.nexalloy.morphe.youtube.video.information.VideoInformationPatchKt.onUserSelectedPlaybackSpeed;
+
 import android.icu.text.NumberFormat;
 
 import java.util.Locale;
@@ -940,6 +942,9 @@ public final class VideoInformation {
             // Rest of the implementation added by patch.
             // RememberPlaybackSpeedPatch.userSelectedPlaybackSpeed(newlyLoadedPlaybackSpeed);
             // PlaybackSpeedDialogButton.videoSpeedChanged(newlyLoadedPlaybackSpeed);
+
+            // custom change
+            onUserSelectedPlaybackSpeed(newlyLoadedPlaybackSpeed);
         }
     }
 

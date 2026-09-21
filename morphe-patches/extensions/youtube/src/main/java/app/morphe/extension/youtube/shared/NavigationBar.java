@@ -10,6 +10,8 @@
 
 package app.morphe.extension.youtube.shared;
 
+import static io.github.nexalloy.morphe.youtube.misc.navigation.NavigationBarHookPatchKt.onNavigationTabCreated;
+
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.view.View;
@@ -33,7 +35,6 @@ import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.settings.BaseSettings;
-import app.morphe.extension.shared.spoof.SpoofAppVersionPatch;
 import app.morphe.extension.youtube.patches.VersionCheckPatch;
 import app.morphe.extension.youtube.settings.Settings;
 
@@ -110,6 +111,18 @@ public final class NavigationBar {
             return;
         }
 
+        toolbarResultsRef = new WeakReference<>(toolbar);
+    }
+
+    /**
+     * Injection point.
+     * custom change
+     */
+    public static void setToolbar(AppCompatToolbarPatchInterface toolbar) {
+        if (toolbar == null) {
+            Logger.printException(() -> "Could not find navigation toolbar");
+            return;
+        }
         toolbarResultsRef = new WeakReference<>(toolbar);
     }
 
@@ -239,6 +252,14 @@ public final class NavigationBar {
 
     /**
      * Injection point.
+     * custom chagne, TODO delete me?
+     */
+    public static void setLastAppNavigationEnumYou() {
+        lastYTNavigationEnumName = NavigationButton.LIBRARY.ytEnumNames.get(0);
+    }
+
+    /**
+     * Injection point.
      */
     public static void navigationTabLoaded(final View navigationButtonGroup) {
         try {
@@ -330,14 +351,15 @@ public final class NavigationBar {
 
     /** @noinspection EmptyMethod*/
     private static void navigationTabCreatedCallback(NavigationButton button, View tabView) {
-        // Code is added during patching.
+        // custom change
+        onNavigationTabCreated(button, tabView);
     }
 
     /**
      * Custom cairo notification filled icon to fix unpatched app missing resource.
      */
     private static final int fillBellCairoBlack = ResourceUtils.getIdentifier(ResourceType.DRAWABLE,
-            VersionCheckPatch.IS_20_31_OR_GREATER && !SpoofAppVersionPatch.isSpoofingToLessThan("20.31.00")
+            VersionCheckPatch.IS_20_31_OR_GREATER
                     ? "yt_fill_experimental_bell_vd_theme_24"
                     : "morphe_fill_bell_cairo_black_24"
     );

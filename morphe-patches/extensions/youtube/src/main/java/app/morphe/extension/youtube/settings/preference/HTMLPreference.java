@@ -2,6 +2,7 @@ package app.morphe.extension.youtube.settings.preference;
 
 import android.content.Context;
 import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.AttributeSet;
 
@@ -10,10 +11,6 @@ import android.util.AttributeSet;
  */
 @SuppressWarnings({"unused", "deprecation"})
 public class HTMLPreference extends Preference {
-    {
-        setSummary(Html.fromHtml(getSummary().toString(), Html.FROM_HTML_MODE_COMPACT));
-    }
-
     public HTMLPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
@@ -28,5 +25,12 @@ public class HTMLPreference extends Preference {
 
     public HTMLPreference(Context context) {
         super(context);
+    }
+
+
+    @Override
+    protected void onAttachedToHierarchy(PreferenceManager preferenceManager) {
+        super.onAttachedToHierarchy(preferenceManager);
+        setSummary(Html.fromHtml(getSummary().toString(), Html.FROM_HTML_MODE_COMPACT));
     }
 }

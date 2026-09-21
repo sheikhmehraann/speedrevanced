@@ -32,7 +32,7 @@ abstract class BaseGestureController(
         controller.config.swipeMagnitudeThreshold.toDouble(),
     ),
     VolumeAndBrightnessScroller by VolumeAndBrightnessScrollerImpl(
-        controller,
+        controller.activity,
         controller.audio,
         controller.screen,
         controller.overlay,
@@ -47,7 +47,7 @@ abstract class BaseGestureController(
      * The main gesture detector that powers everything.
      */
     @Suppress("LeakingThis")
-    protected val detector = GestureDetector(controller, this)
+    protected val detector = GestureDetector(controller.activity, this)
 
     /**
      * Whether downstream events have been canceled; used in [onScroll].
