@@ -18,9 +18,10 @@ val metaAIOptionFingerprint = findMethodDirect {
     }
     if (r2.isNotEmpty()) return@findMethodDirect r2.first()
 
-    findMethod {
+    val r3 = findMethod {
         matcher {
             strings("meta_ai")
         }
-    }.first()
+    }
+    r3.firstOrNull() ?: r2.firstOrNull() ?: r1.firstOrNull() ?: error("metaAIOptionFingerprint not found")
 }

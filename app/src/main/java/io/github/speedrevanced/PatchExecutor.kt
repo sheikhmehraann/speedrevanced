@@ -200,7 +200,7 @@ class PatchExecutor(
 
         val id = "${packageInfo.lastUpdateTime}-$moduleRel"
         val cachedId = cache.getString("id", null)
-        val isCached = cachedId.equals(id) && !DEBUG
+        val isCached = cachedId.equals(id)
 
         Logger.printInfo { "cache ID : $id" }
         Logger.printInfo { "cached ID: ${cachedId ?: ""}" }
@@ -209,7 +209,6 @@ class PatchExecutor(
         if (!isCached) {
             cache.clearAll()
             cache.putString("id", id)
-            Utils.showToastLong("Speed Revanced is initializing, please wait...")
         }
     }
 
@@ -235,17 +234,13 @@ class PatchExecutor(
         val success = failedPatches.isEmpty()
         if (!success) {
             XposedBridge.log("${lpparam.applicationInfo.packageName} version: ${getAppVersion()}")
-            Utils.showToastLong("Error while apply following patches:\n${failedPatches.joinToString { it.name }}")
+            XposedBridge.log("Failed patches: ${failedPatches.joinToString { it.name }}")
         }
     }
 
     private fun logDebugInfo() {
-        val success = failedPatches.isEmpty()
         if (DEBUG) {
-            XposedBridge.log("${lpparam.applicationInfo.packageName} version: ${getAppVersion()}")
-            if (success) {
-                Utils.showToastLong("apply patches success")
-            }
+            XposedBridge.log("${lpparam.applicationInfo.packageName} version: ${getAppVersion()} - ${appliedPatches.size} patches applied")
         }
     }
 
@@ -271,8 +266,11 @@ class PatchExecutor(
         }
     }
 
-    val KProperty0<FindMethodFunc>.dexMethod
+    val KProperty0<FindMethodFunc>.dexMethodOrNull: DexMethod?
         get() = getDexMethod(this.name, this.get())
+
+    val KProperty0<FindMethodFunc>.dexMethod: DexMethod
+        get() = dexMethodOrNull ?: error("Method ${this.name} not found")
 
     val KProperty0<FindMethodFunc>.method
         get() = dexMethod.toMethod()
@@ -287,18 +285,21 @@ class PatchExecutor(
         get() = runCatching { this.member }.getOrNull()
 
     fun KProperty0<FindMethodFunc>.hookMethod(block: HookDsl<IHookCallback>.() -> Unit) {
-        dexMethod.hookMethod(block)
+        dexMethodOrNull?.hookMethod(block) ?: Logger.printInfo { "Skipping hook for ${this.name}: method not found" }
     }
 
     fun KProperty0<FindMethodFunc>.hookMethod(callback: XC_MethodHook) {
-        dexMethod.hookMethod(callback)
+        dexMethodOrNull?.hookMethod(callback) ?: Logger.printInfo { "Skipping hook for ${this.name}: method not found" }
     }
 
     val KProperty0<FindMethodListFunc>.dexMethodList
         get() = getDexMethods(this.name, this.get())
 
-    val KProperty0<FindFieldFunc>.dexField
+    val KProperty0<FindFieldFunc>.dexFieldOrNull: DexField?
         get() = getDexField(this.name, this.get())
+
+    val KProperty0<FindFieldFunc>.dexField: DexField
+        get() = dexFieldOrNull ?: error("Field ${this.name} not found")
 
     val KProperty0<FindFieldFunc>.field
         get() = dexField.toField()
@@ -309,8 +310,11 @@ class PatchExecutor(
     val KProperty0<FindFieldFunc>.type
         get() = classLoader.loadClass(dexField.className)
 
-    val KProperty0<FindClassFunc>.dexClass
+    val KProperty0<FindClassFunc>.dexClassOrNull: DexClass?
         get() = getDexClass(this.name, this.get())
+
+    val KProperty0<FindClassFunc>.dexClass: DexClass
+        get() = dexClassOrNull ?: error("Class ${this.name} not found")
 
     val KProperty0<FindClassFunc>.clazz
         get() = dexClass.toClass()
@@ -320,15 +324,19 @@ class PatchExecutor(
     private val Fingerprint.cacheKey
         get() = this::class.simpleName ?: error("Anonymous Fingerprint has no cache key")
 
+    val Fingerprint.dexMethodOrNull: DexMethod?
+        get() = getDexMethod(cacheKey) { this@dexMethodOrNull.run() }
+
+    val Fingerprint.dexMethod: DexMethod
+        get() = dexMethodOrNull ?: error("Fingerprint $cacheKey not found")
+
     fun Fingerprint.hookMethod(block: HookDsl<IHookCallback>.() -> Unit) {
-        getDexMethod(cacheKey) { this@hookMethod.run() }.hookMethod(block)
+        dexMethodOrNull?.hookMethod(block) ?: Logger.printInfo { "Skipping hook for $cacheKey: method not found" }
     }
 
     fun Fingerprint.hookMethod(callback: XC_MethodHook) {
-        getDexMethod(cacheKey) { this@hookMethod.run() }.hookMethod(callback)
+        dexMethodOrNull?.hookMethod(callback) ?: Logger.printInfo { "Skipping hook for $cacheKey: method not found" }
     }
-
-    val Fingerprint.dexMethod get() = getDexMethod(cacheKey) { this@dexMethod.run() }
 
     val Fingerprint.member get() = dexMethod.toMember()
 
@@ -374,20 +382,28 @@ class PatchExecutor(
 
     private inline fun getDexClass(
         key: String, crossinline findFunc: DexKitBridge.() -> ClassData
-    ): DexClass = dexkit.getClassDirectOrNull(key, wrapFind(key, findFunc) { it.descriptor })!!
+    ): DexClass? = runCatching {
+        dexkit.getClassDirectOrNull(key, wrapFind(key, findFunc) { it.descriptor })
+    }.getOrNull()
 
     private inline fun getDexMethod(
         key: String, crossinline findFunc: DexKitBridge.() -> MethodData
-    ): DexMethod = dexkit.getMethodDirectOrNull(key, wrapFind(key, findFunc) { it.descriptor })!!
+    ): DexMethod? = runCatching {
+        dexkit.getMethodDirectOrNull(key, wrapFind(key, findFunc) { it.descriptor })
+    }.getOrNull()
 
     private inline fun getDexField(
         key: String, crossinline findFunc: DexKitBridge.() -> FieldData
-    ): DexField = dexkit.getFieldDirectOrNull(key, wrapFind(key, findFunc) { it.descriptor })!!
+    ): DexField? = runCatching {
+        dexkit.getFieldDirectOrNull(key, wrapFind(key, findFunc) { it.descriptor })
+    }.getOrNull()
 
     private inline fun getDexMethods(
         key: String, crossinline findFunc: DexKitBridge.() -> List<MethodData>
-    ): List<DexMethod> = dexkit.getMethodsDirectOrEmpty(
-        key, wrapFindList(key, findFunc) { it.descriptor })
+    ): List<DexMethod> = runCatching {
+        dexkit.getMethodsDirectOrEmpty(
+            key, wrapFindList(key, findFunc) { it.descriptor })
+    }.getOrDefault(emptyList())
 }
 
 val ExtensionResourceHook = patch {
@@ -401,7 +417,7 @@ val ExtensionResourceHook = patch {
             override fun onActivityCreated(activity: Activity, bundle: Bundle?) {
                 Logger.printDebug { "onActivityCreated $activity" }
                 if (!handleWebView) {
-                    WebView(activity).destroy()
+                    runCatching { WebView(activity).destroy() }
                     appContext.addModuleAssets()
                     handleWebView = true
                 }

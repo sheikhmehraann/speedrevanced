@@ -2,7 +2,6 @@ package io.github.speedrevanced.revanced.meta.ghost
 
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
-import de.robv.android.xposed.XposedHelpers
 import io.github.speedrevanced.patch
 
 val GhostDM = patch(
@@ -10,18 +9,26 @@ val GhostDM = patch(
     description = "Prevents sending read receipts and typing status when viewing or replying to Instagram direct messages."
 ) {
     runCatching {
-        // Intercept DirectSendSeenMutation and DirectMarkThreadSeen
-        val directMutationClass = runCatching {
-            classLoader.loadClass("com.instagram.direct.send.mutation.DirectSendSeenMutation")
-        }.getOrNull()
-
-        if (directMutationClass != null) {
-            for (method in directMutationClass.declaredMethods) {
-                XposedBridge.hookMethod(method, object : XC_MethodHook() {
-                    override fun beforeHookedMethod(param: MethodHookParam) {
-                        param.result = null
+        val classNames = listOf(
+            "com.instagram.direct.send.mutation.DirectSendSeenMutation",
+            "com.instagram.direct.model.protobufmodel.IgThreadSeenMarkerMessage",
+            "com.instagram.direct.model.protobufmodel.IgThreadDisappearingModeSeenMarkerMessage",
+            "com.instagram.direct.model.protobufmodel.IgDThreadShhModeSeenMarkerMessage"
+        )
+        for (className in classNames) {
+            val clazz = runCatching { classLoader.loadClass(className) }.getOrNull() ?: continue
+            for (method in clazz.declaredMethods) {
+                if (method.name.contains("send", ignoreCase = true) ||
+                    method.name.contains("mark", ignoreCase = true) ||
+                    method.name.contains("seen", ignoreCase = true)) {
+                    runCatching {
+                        XposedBridge.hookMethod(method, object : XC_MethodHook() {
+                            override fun beforeHookedMethod(param: MethodHookParam) {
+                                param.result = null
+                            }
+                        })
                     }
-                })
+                }
             }
         }
     }

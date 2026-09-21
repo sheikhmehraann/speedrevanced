@@ -21,10 +21,11 @@ val adInjectorFingerprint = findMethodDirect {
     }
     if (r2.isNotEmpty()) return@findMethodDirect r2.first()
 
-    findMethod {
+    val r3 = findMethod {
         matcher {
             returns("boolean")
             strings("sponsored_content")
         }
-    }.first()
+    }
+    r3.firstOrNull() ?: r2.firstOrNull() ?: r1.firstOrNull() ?: error("adInjectorFingerprint not found")
 }
