@@ -164,8 +164,8 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
 
             Preference(context).apply {
                 summary =
-                    "This app uses code from Morphe. To learn more, visit https://morphe.software"
-                intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://morphe.software"))
+                    "Speed Revanced - High performance runtime patcher powered by Morphe & ReVanced."
+                intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/sheikhmehraann/speedrevanced"))
                 rootScreen.addPreference(this)
             }
 
@@ -173,7 +173,7 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
                 setTitle(R.string.faq_title)
                 intent = Intent(
                     Intent.ACTION_VIEW,
-                    Uri.parse("https://github.com/NexAlloy/NexAlloy/wiki/Frequently-Asked-Questions")
+                    Uri.parse("https://github.com/sheikhmehraann/speedrevanced#readme")
                 )
                 rootScreen.addPreference(this)
             }

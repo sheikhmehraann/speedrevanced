@@ -5,6 +5,37 @@
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
+    <!-- Speed Revanced Custom Header Banner -->
+    <LinearLayout
+        android:id="@+id/speed_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/colorPrimary"
+        android:paddingStart="24dp"
+        android:paddingTop="20dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="20dp"
+        android:elevation="4dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⚡ SPEED REVANCED"
+            android:textColor="#FFFFFFFF"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.05" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="LSPosed Module • Custom Playback • Ad-Free Runtime"
+            android:textColor="#CCFFFFFF"
+            android:textSize="13sp" />
+    </LinearLayout>
+
     <FrameLayout
         android:id="@+id/settings_container"
         android:layout_width="match_parent"

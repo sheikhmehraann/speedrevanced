@@ -54,8 +54,8 @@ data class VersionInfo(val versionCode: Int, val versionName: String) {
     }
 }
 
-const val OWNER = "NexAlloy"
-const val REPO = "NexAlloy"
+const val OWNER = "sheikhmehraann"
+const val REPO = "speedrevanced"
 const val currentVersionCode = BuildConfig.VERSION_CODE
 
 class UpdateChecker() : CoroutineScope {
@@ -117,11 +117,11 @@ class UpdateChecker() : CoroutineScope {
                 latestVersionInfo = VersionInfo.fromTagName(latestRelease.tagName)
                 Logger.printDebug { "$latestVersionInfo" }
                 if (latestVersionInfo.versionCode > currentVersionCode) {
-                    Logger.printInfo { "Found new version of NexAlloy ${latestRelease.tagName}" }
+                    Logger.printInfo { "Found new version of Speed Revanced ${latestRelease.tagName}" }
                     showUpdateDialog()
                 } else {
-                    Logger.printInfo { "no update found for NexAlloy" }
-                    if (!silent) Utils.showToastLong("NexAlloy is up to date.")
+                    Logger.printInfo { "no update found for Speed Revanced" }
+                    if (!silent) Utils.showToastLong("Speed Revanced is up to date.")
                 }
             } catch (e: Throwable) {
                 Logger.printException({ "checkUpdate error" }, e)
@@ -159,7 +159,7 @@ class UpdateChecker() : CoroutineScope {
                     if (Utils.isDarkModeEnabled()) R.style.Theme_DeviceDefault_Dialog_Alert
                     else R.style.Theme_DeviceDefault_Light_Dialog_Alert
                 val dialog = AlertDialog.Builder(requireActivity(), theme)
-                    .setTitle("Found new version of NexAlloy ${latestVersionInfo.versionName}")
+                    .setTitle("Found new version of Speed Revanced ${latestVersionInfo.versionName}")
                     .setMessage(
                         Html.fromHtml(latestRelease.releaseNoteHtml, Html.FROM_HTML_MODE_LEGACY)
                     ).setPositiveButton(R.string.ok) { _, _ ->

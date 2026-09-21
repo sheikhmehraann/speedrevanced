@@ -5,7 +5,9 @@
     <style name="MainTheme" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="p">true</item>
-        <item name="android:colorAccent">#1a73e9</item>
+        <item name="android:colorAccent">#FF0055FF</item>
+        <item name="android:colorPrimary">#FF0055FF</item>
+        <item name="android:colorPrimaryDark">#FF0033AA</item>
         <item name="android:fitsSystemWindows">true</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
