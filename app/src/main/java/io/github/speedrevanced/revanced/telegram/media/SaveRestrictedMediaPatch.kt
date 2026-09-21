@@ -49,5 +49,25 @@ val SaveRestrictedMedia = patch(
                 }
             }
         }
+
+        // Allow screenshots by removing FLAG_SECURE
+        runCatching {
+            XposedHelpers.findAndHookMethod(
+                android.view.Window::class.java,
+                "setFlags",
+                java.lang.Integer.TYPE,
+                java.lang.Integer.TYPE,
+                object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        var flags = param.args[0] as Int
+                        val mask = param.args[1] as Int
+                        if ((mask and android.view.WindowManager.LayoutParams.FLAG_SECURE) != 0) {
+                            flags = flags and android.view.WindowManager.LayoutParams.FLAG_SECURE.inv()
+                            param.args[0] = flags
+                        }
+                    }
+                }
+            )
+        }
     }
 }
