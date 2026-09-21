@@ -271,57 +271,48 @@ class PatchExecutor(
         }
     }
 
-    val KProperty0<FindMethodFunc>.dexMethodOrNull: DexMethod?
-        get() = getDexMethodOrNull(this.name, this.get())
+    val KProperty0<FindMethodFunc>.dexMethod
+        get() = getDexMethod(this.name, this.get())
 
-    val KProperty0<FindMethodFunc>.dexMethod: DexMethod
-        get() = dexMethodOrNull ?: throw NoSuchMethodException("Fingerprint ${this.name} not found")
-
-    val KProperty0<FindMethodFunc>.method: Method
+    val KProperty0<FindMethodFunc>.method
         get() = dexMethod.toMethod()
 
-    val KProperty0<FindMethodFunc>.constructor: Constructor<*>
+    val KProperty0<FindMethodFunc>.constructor
         get() = dexMethod.toConstructor()
 
-    val KProperty0<FindMethodFunc>.member: Member
+    val KProperty0<FindMethodFunc>.member
         get() = dexMethod.toMember()
 
-    val KProperty0<FindMethodFunc>.memberOrNull: Member?
+    val KProperty0<FindMethodFunc>.memberOrNull
         get() = runCatching { this.member }.getOrNull()
 
     fun KProperty0<FindMethodFunc>.hookMethod(block: HookDsl<IHookCallback>.() -> Unit) {
-        dexMethodOrNull?.hookMethod(block)
+        dexMethod.hookMethod(block)
     }
 
     fun KProperty0<FindMethodFunc>.hookMethod(callback: XC_MethodHook) {
-        dexMethodOrNull?.hookMethod(callback)
+        dexMethod.hookMethod(callback)
     }
 
-    val KProperty0<FindMethodListFunc>.dexMethodList: List<DexMethod>
+    val KProperty0<FindMethodListFunc>.dexMethodList
         get() = getDexMethods(this.name, this.get())
 
-    val KProperty0<FindFieldFunc>.dexFieldOrNull: DexField?
-        get() = getDexFieldOrNull(this.name, this.get())
+    val KProperty0<FindFieldFunc>.dexField
+        get() = getDexField(this.name, this.get())
 
-    val KProperty0<FindFieldFunc>.dexField: DexField
-        get() = dexFieldOrNull ?: throw NoSuchFieldException("Fingerprint ${this.name} not found")
-
-    val KProperty0<FindFieldFunc>.field: Field
+    val KProperty0<FindFieldFunc>.field
         get() = dexField.toField()
 
-    val KProperty0<FindFieldFunc>.declaredClass: Class<*>
+    val KProperty0<FindFieldFunc>.declaredClass
         get() = classLoader.loadClass(dexField.declaredClassName)
 
-    val KProperty0<FindFieldFunc>.type: Class<*>
+    val KProperty0<FindFieldFunc>.type
         get() = classLoader.loadClass(dexField.className)
 
-    val KProperty0<FindClassFunc>.dexClassOrNull: DexClass?
-        get() = getDexClassOrNull(this.name, this.get())
+    val KProperty0<FindClassFunc>.dexClass
+        get() = getDexClass(this.name, this.get())
 
-    val KProperty0<FindClassFunc>.dexClass: DexClass
-        get() = dexClassOrNull ?: throw ClassNotFoundException("Fingerprint ${this.name} not found")
-
-    val KProperty0<FindClassFunc>.clazz: Class<*>
+    val KProperty0<FindClassFunc>.clazz
         get() = dexClass.toClass()
 
     // Fingerprint object extensions
@@ -330,11 +321,11 @@ class PatchExecutor(
         get() = this::class.simpleName ?: error("Anonymous Fingerprint has no cache key")
 
     fun Fingerprint.hookMethod(block: HookDsl<IHookCallback>.() -> Unit) {
-        getDexMethodOrNull(cacheKey) { this@hookMethod.run() }?.hookMethod(block)
+        getDexMethod(cacheKey) { this@hookMethod.run() }.hookMethod(block)
     }
 
     fun Fingerprint.hookMethod(callback: XC_MethodHook) {
-        getDexMethodOrNull(cacheKey) { this@hookMethod.run() }?.hookMethod(callback)
+        getDexMethod(cacheKey) { this@hookMethod.run() }.hookMethod(callback)
     }
 
     val Fingerprint.dexMethod get() = getDexMethod(cacheKey) { this@dexMethod.run() }
@@ -381,29 +372,17 @@ class PatchExecutor(
         }
     }
 
-    private inline fun getDexClassOrNull(
-        key: String, crossinline findFunc: DexKitBridge.() -> ClassData
-    ): DexClass? = dexkit.getClassDirectOrNull(key, wrapFind(key, findFunc) { it.descriptor })
-
     private inline fun getDexClass(
         key: String, crossinline findFunc: DexKitBridge.() -> ClassData
-    ): DexClass = getDexClassOrNull(key, findFunc) ?: throw ClassNotFoundException("Fingerprint $key not found")
-
-    private inline fun getDexMethodOrNull(
-        key: String, crossinline findFunc: DexKitBridge.() -> MethodData
-    ): DexMethod? = dexkit.getMethodDirectOrNull(key, wrapFind(key, findFunc) { it.descriptor })
+    ): DexClass = dexkit.getClassDirectOrNull(key, wrapFind(key, findFunc) { it.descriptor })!!
 
     private inline fun getDexMethod(
         key: String, crossinline findFunc: DexKitBridge.() -> MethodData
-    ): DexMethod = getDexMethodOrNull(key, findFunc) ?: throw NoSuchMethodException("Fingerprint $key not found")
-
-    private inline fun getDexFieldOrNull(
-        key: String, crossinline findFunc: DexKitBridge.() -> FieldData
-    ): DexField? = dexkit.getFieldDirectOrNull(key, wrapFind(key, findFunc) { it.descriptor })
+    ): DexMethod = dexkit.getMethodDirectOrNull(key, wrapFind(key, findFunc) { it.descriptor })!!
 
     private inline fun getDexField(
         key: String, crossinline findFunc: DexKitBridge.() -> FieldData
-    ): DexField = getDexFieldOrNull(key, findFunc) ?: throw NoSuchFieldException("Fingerprint $key not found")
+    ): DexField = dexkit.getFieldDirectOrNull(key, wrapFind(key, findFunc) { it.descriptor })!!
 
     private inline fun getDexMethods(
         key: String, crossinline findFunc: DexKitBridge.() -> List<MethodData>
