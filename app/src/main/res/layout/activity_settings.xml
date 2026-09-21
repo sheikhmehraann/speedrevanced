@@ -77,156 +77,176 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Hero Status Card (KernelSU / SukiSU Style) -->
-                <LinearLayout
+                <!-- Hero Status Card (KernelSU / SukiSU Ultra Style with Watermark) -->
+                <FrameLayout
                     android:id="@+id/card_hero_status"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/ksu_status_card_bg"
-                    android:orientation="vertical"
-                    android:padding="18dp">
+                    android:clipChildren="true"
+                    android:clipToPadding="true">
 
-                    <!-- Header Row: Status Tag + Large Checkmark -->
+                    <!-- Watermark Icon (SukiSU Ultra signature design) -->
+                    <ImageView
+                        android:id="@+id/hero_watermark"
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
+                        android:layout_gravity="bottom|end"
+                        android:layout_marginEnd="-15dp"
+                        android:layout_marginBottom="-25dp"
+                        android:alpha="0.12"
+                        android:contentDescription="Watermark"
+                        android:src="@drawable/ic_ksu_shield"
+                        android:tint="#FF36D167" />
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                        android:orientation="vertical"
+                        android:padding="18dp">
 
-                        <TextView
-                            android:id="@+id/hero_mode_tag"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/ksu_pill_bg"
-                            android:text="API 101"
-                            android:textColor="@color/ksu_accent_light"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_height="1dp"
-                            android:layout_weight="1" />
-
-                        <TextView
-                            android:id="@+id/hero_icon_badge"
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:gravity="center"
-                            android:text="✓"
-                            android:textColor="@color/ksu_accent_light"
-                            android:textSize="22sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <!-- Status Title & Subtitle -->
-                    <TextView
-                        android:id="@+id/hero_status_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Working"
-                        android:textColor="@color/ksu_text_primary"
-                        android:textSize="24sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/hero_status_subtitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:text="Speed Revanced is active and hooking"
-                        android:textColor="@color/ksu_accent_light"
-                        android:textSize="13sp" />
-
-                    <!-- Divider -->
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="14dp"
-                        android:layout_marginBottom="14dp"
-                        android:alpha="0.3"
-                        android:background="@color/ksu_status_working_stroke" />
-
-                    <!-- Detail Grid (KernelSU style) -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <!-- Hook Mode Row -->
+                        <!-- Header Row: Status Tag + Large Checkmark -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="6dp"
+                            android:gravity="center_vertical"
                             android:orientation="horizontal">
 
                             <TextView
-                                android:layout_width="100dp"
+                                android:id="@+id/hero_mode_tag"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Framework"
-                                android:textColor="@color/ksu_text_secondary"
-                                android:textSize="12sp" />
+                                android:background="@drawable/ksu_pill_bg"
+                                android:text="API 101"
+                                android:textColor="@color/ksu_accent_light"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+
+                            <View
+                                android:layout_width="0dp"
+                                android:layout_height="1dp"
+                                android:layout_weight="1" />
 
                             <TextView
-                                android:id="@+id/text_framework_info"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="LSPosed (Zygisk) System Hook"
-                                android:textColor="@color/ksu_text_primary"
-                                android:textSize="12sp"
+                                android:id="@+id/hero_icon_badge"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:gravity="center"
+                                android:text="✓"
+                                android:textColor="@color/ksu_accent_light"
+                                android:textSize="22sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
 
-                        <!-- Version Row -->
+                        <!-- Status Title & Subtitle -->
+                        <TextView
+                            android:id="@+id/hero_status_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Working"
+                            android:textColor="@color/ksu_text_primary"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/hero_status_subtitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:text="Speed Revanced is active and hooking"
+                            android:textColor="@color/ksu_accent_light"
+                            android:textSize="13sp" />
+
+                        <!-- Divider -->
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="14dp"
+                            android:layout_marginBottom="14dp"
+                            android:alpha="0.3"
+                            android:background="@color/ksu_status_working_stroke" />
+
+                        <!-- Detail Grid (KernelSU style) -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="6dp"
-                            android:orientation="horizontal">
+                            android:orientation="vertical">
 
-                            <TextView
-                                android:layout_width="100dp"
+                            <!-- Hook Mode Row -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Version"
-                                android:textColor="@color/ksu_text_secondary"
-                                android:textSize="12sp" />
+                                android:layout_marginBottom="6dp"
+                                android:orientation="horizontal">
 
-                            <TextView
-                                android:id="@+id/text_version_info"
-                                android:layout_width="0dp"
+                                <TextView
+                                    android:layout_width="100dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="Framework"
+                                    android:textColor="@color/ksu_text_secondary"
+                                    android:textSize="12sp" />
+
+                                <TextView
+                                    android:id="@+id/text_framework_info"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="LSPosed (Zygisk) System Hook"
+                                    android:textColor="@color/ksu_text_primary"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <!-- Version Row -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="v2.0.109"
-                                android:textColor="@color/ksu_text_primary"
-                                android:textSize="12sp" />
-                        </LinearLayout>
+                                android:layout_marginBottom="6dp"
+                                android:orientation="horizontal">
 
-                        <!-- Engine Row -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal">
+                                <TextView
+                                    android:layout_width="100dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="Version"
+                                    android:textColor="@color/ksu_text_secondary"
+                                    android:textSize="12sp" />
 
-                            <TextView
-                                android:layout_width="100dp"
+                                <TextView
+                                    android:id="@+id/text_version_info"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="v2.0.109"
+                                    android:textColor="@color/ksu_text_primary"
+                                    android:textSize="12sp" />
+                            </LinearLayout>
+
+                            <!-- Engine Row -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Engine"
-                                android:textColor="@color/ksu_text_secondary"
-                                android:textSize="12sp" />
+                                android:orientation="horizontal">
 
-                            <TextView
-                                android:id="@+id/text_engine_info"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Morphe + DexKit Dynamic"
-                                android:textColor="@color/ksu_text_primary"
-                                android:textSize="12sp" />
+                                <TextView
+                                    android:layout_width="100dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="Engine"
+                                    android:textColor="@color/ksu_text_secondary"
+                                    android:textSize="12sp" />
+
+                                <TextView
+                                    android:id="@+id/text_engine_info"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="Morphe + DexKit Dynamic"
+                                    android:textColor="@color/ksu_text_primary"
+                                    android:textSize="12sp" />
+                            </LinearLayout>
                         </LinearLayout>
                     </LinearLayout>
-                </LinearLayout>
+                </FrameLayout>
 
                 <!-- Quick Metrics Row (KernelSU Style) -->
                 <LinearLayout
@@ -838,7 +858,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="Commit: 87b63a2"
+                            android:text="Commit: e2714f0"
                             android:textColor="@color/ksu_text_muted"
                             android:textSize="12sp" />
 

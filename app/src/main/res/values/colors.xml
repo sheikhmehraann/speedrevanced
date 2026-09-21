@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- KernelSU / SukiSU Dark Palette -->
-    <color name="ksu_bg">#FF121212</color>
-    <color name="ksu_surface">#FF1E1E1E</color>
-    <color name="ksu_surface_variant">#FF2A2A2A</color>
-    <color name="ksu_card">#FF242424</color>
-    <color name="ksu_card_stroke">#FF333333</color>
+    <!-- KernelSU / SukiSU Ultra Dark Palette -->
+    <color name="ksu_bg">#FF121214</color>
+    <color name="ksu_surface">#FF18181A</color>
+    <color name="ksu_surface_variant">#FF222226</color>
+    <color name="ksu_card">#FF1C1C1E</color>
+    <color name="ksu_card_stroke">#FF28282C</color>
     
     <!-- SukiSU & KSU Status Card Colors -->
     <color name="ksu_status_working_bg">#FF1A3825</color>
@@ -21,20 +21,20 @@
     <color name="ksu_warning">#FFFF9800</color>
     <color name="ksu_error">#FFF44336</color>
 
-    <color name="ksu_text_primary">#FFF5F5F5</color>
-    <color name="ksu_text_secondary">#FFAAAAAA</color>
-    <color name="ksu_text_muted">#FF707070</color>
+    <color name="ksu_text_primary">#FFFFFFFF</color>
+    <color name="ksu_text_secondary">#FF8E8E93</color>
+    <color name="ksu_text_muted">#FF636366</color>
 
     <!-- Legacy compatibility mappings -->
-    <color name="speed_primary">#FF1E1E1E</color>
-    <color name="speed_primary_dark">#FF121212</color>
+    <color name="speed_primary">#FF18181A</color>
+    <color name="speed_primary_dark">#FF121214</color>
     <color name="speed_accent">#FF4CAF50</color>
-    <color name="speed_bg_dark">#FF121212</color>
-    <color name="speed_card_dark">#FF1E1E1E</color>
-    <color name="speed_card_stroke">#FF333333</color>
-    <color name="speed_text_primary">#FFF5F5F5</color>
-    <color name="speed_text_secondary">#FFAAAAAA</color>
-    <color name="speed_text_muted">#FF707070</color>
+    <color name="speed_bg_dark">#FF121214</color>
+    <color name="speed_card_dark">#FF1C1C1E</color>
+    <color name="speed_card_stroke">#FF28282C</color>
+    <color name="speed_text_primary">#FFFFFFFF</color>
+    <color name="speed_text_secondary">#FF8E8E93</color>
+    <color name="speed_text_muted">#FF636366</color>
     <color name="speed_badge_bg">#1A4CAF50</color>
 
     <color name="skip_ad_button_foreground_color">#ffff</color>

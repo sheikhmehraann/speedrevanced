@@ -7,17 +7,21 @@ val RemoveMetaAI = patch(
     name = "Remove Meta AI",
     description = "Removes Meta AI suggestions, search entries, and options."
 ) {
-    ::metaAIOptionFingerprint.hookMethod(object : XC_MethodHook() {
-        override fun afterHookedMethod(param: MethodHookParam) {
-            val list = param.result as? MutableList<*> ?: return
-            val iterator = list.iterator()
-            while (iterator.hasNext()) {
-                val item = iterator.next()?.toString()?.uppercase() ?: ""
-                if (item.contains("GEN_AI") || item.contains("GENAI") || item.contains("META_AI") ||
-                    item.contains("METAAI") || item.contains("ASK_META") || item.contains("CONTENT_DEEP_DIVE")) {
-                    iterator.remove()
-                }
+    runCatching {
+        ::metaAIOptionFingerprint.hookMethod(object : XC_MethodHook() {
+            override fun afterHookedMethod(param: MethodHookParam) {
+                val list = param.result as? MutableList<*> ?: return
+                try {
+                    val iterator = list.iterator()
+                    while (iterator.hasNext()) {
+                        val item = iterator.next()?.toString()?.uppercase() ?: ""
+                        if (item.contains("GEN_AI") || item.contains("GENAI") || item.contains("META_AI") ||
+                            item.contains("METAAI") || item.contains("ASK_META") || item.contains("CONTENT_DEEP_DIVE")) {
+                            iterator.remove()
+                        }
+                    }
+                } catch (_: Throwable) {}
             }
-        }
-    })
+        })
+    }
 }

@@ -4,40 +4,25 @@ import android.app.Application
 import app.morphe.extension.shared.ResourceType
 import app.morphe.extension.shared.ResourceUtils
 import app.morphe.extension.shared.Utils
-import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import io.github.libxposed.api.XposedInterface
 import io.github.libxposed.api.XposedModule
 import io.github.libxposed.api.XposedModuleInterface
 import io.github.libxposed.api.XposedModuleInterface.PackageReadyParam
-import io.github.speedrevanced.common.UpdateChecker
 import io.github.speedrevanced.morphe.ResourceFinder
 import io.github.speedrevanced.morphe.resourceMappings
 
 class MainHook : XposedModule() {
-    lateinit var param: PackageReadyParam
-    lateinit var app: Application
-    var targetPackageName: String? = null
-
-    fun shouldHook(packageName: String): Boolean {
-        if (!patchesByPackage.containsKey(packageName)) return false
-        if (targetPackageName == null) targetPackageName = packageName
-        return targetPackageName == packageName
-    }
 
     override fun onModuleLoaded(param: XposedModuleInterface.ModuleLoadedParam) {
         modulePath = moduleApplicationInfo.sourceDir
     }
 
     override fun onPackageReady(param: PackageReadyParam) {
-        if (!param.isFirstPackage) return
-        if (!shouldHook(param.packageName)) return
-        this.param = param
+        val patches = patchesByPackage[param.packageName] ?: return
 
         inContext(param) { app ->
-            this.app = app
             if (isReVancedPatched(param)) {
-                Utils.showToastLong("Speed Revanced does not work with pre-patched app")
                 return@inContext
             }
 
@@ -49,7 +34,6 @@ class MainHook : XposedModule() {
                 }
             }
 
-            val patches = patchesByPackage[param.packageName] ?: return@inContext
             PatchExecutor(app, param, this).applyPatches(patches)
         }
     }
@@ -65,23 +49,32 @@ class MainHook : XposedModule() {
             param.classLoader.loadClass("app.revanced.integrations.shared.utils.Utils")
         }.isSuccess
     }
-
 }
 
 context(xposed: XposedInterface)
 fun inContext(lpparam: PackageReadyParam, f: (Application) -> Unit) {
-    val appClazz = XposedHelpers.findClass(lpparam.applicationInfo.className, lpparam.classLoader)
-    appClazz.getMethod("onCreate").hookMethod {
+    val className = lpparam.applicationInfo.className
+    val appClazz = runCatching {
+        if (!className.isNullOrEmpty()) {
+            XposedHelpers.findClass(className, lpparam.classLoader)
+        } else {
+            Application::class.java
+        }
+    }.getOrElse {
+        Application::class.java
+    }
+
+    val onCreateMethod = runCatching {
+        appClazz.getMethod("onCreate")
+    }.getOrElse {
+        Application::class.java.getMethod("onCreate")
+    }
+
+    onCreateMethod.hookMethod {
         before {
-            val app = it.thisObject as Application
+            val app = it.thisObject as? Application ?: return@before
             Utils.setContext(app)
             f(app)
-            if (modulePath.startsWith("/data/app/")) {
-                val prefs = xposed.getRemotePreferences("prefs")
-                if (!prefs.getBoolean("disable_auto_check_update", false)) {
-                    UpdateChecker().hookNewActivity()
-                }
-            }
         }
     }
 }
