@@ -1,178 +1,221 @@
-@file:Suppress("DEPRECATION")
-
 package io.github.speedrevanced.activity
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
 import android.os.Vibrator
-import android.preference.CheckBoxPreference
-import android.preference.Preference
-import android.preference.PreferenceFragment
+import android.os.VibratorManager
 import android.provider.Settings
-import android.view.MenuItem
+import android.view.LayoutInflater
 import android.view.View
-import android.widget.Button
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.Switch
+import android.widget.TextView
+import app.morphe.extension.shared.Utils
 import io.github.libxposed.service.XposedService
+import io.github.speedrevanced.AppPatchInfo
 import io.github.speedrevanced.R
 import io.github.speedrevanced.appPatchConfigurations
 
-class AppPatchSettingsActivity : Activity() {
+class AppPatchSettingsActivity : Activity(), SettingApplication.ServiceStateListener {
 
     companion object {
         const val ARGUMENT_APP_NAME = "app_name_key"
     }
 
+    private var mService: XposedService? = null
+    private var currentAppInfo: AppPatchInfo? = null
+    private val patchSwitchMap = mutableMapOf<String, Switch>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_app_patch_settings)
-
-        actionBar?.setDisplayHomeAsUpEnabled(true)
+        Utils.setContext(this)
 
         val appName = intent.getStringExtra(ARGUMENT_APP_NAME)
-        actionBar?.title = appName
+        currentAppInfo = appPatchConfigurations.find { it.appName == appName }
 
-        if (savedInstanceState != null) return
-        val fragment = AppPatchSettingsFragment().apply {
-            arguments = Bundle().apply {
-                putString(ARGUMENT_APP_NAME, appName)
-            }
-        }
-        fragmentManager.beginTransaction()
-            .replace(R.id.app_patch_settings_container, fragment)
-            .commit()
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == android.R.id.home) {
+        findViewById<ImageView>(R.id.btn_back)?.setOnClickListener {
             onBackPressed()
-            return true
         }
-        return super.onOptionsItemSelected(item)
+
+        setupHeader()
+        setupActionButtons()
     }
 
-    @Suppress("OVERRIDE_DEPRECATION")
-    class AppPatchSettingsFragment : PreferenceFragment(), SettingApplication.ServiceStateListener {
+    private fun setupHeader() {
+        val appInfo = currentAppInfo ?: return
+        findViewById<TextView>(R.id.patch_header_title)?.text = appInfo.appName
+        findViewById<TextView>(R.id.patch_header_pkg)?.text = appInfo.packageName
+        updatePatchCountBadge()
+    }
 
-        @Deprecated("Deprecated in Java")
-        override fun onCreate(savedInstanceState: Bundle?) {
-            super.onCreate(savedInstanceState)
-        }
+    private fun setupActionButtons() {
+        val appInfo = currentAppInfo ?: return
 
-        private var mService: XposedService? = null
-
-        override fun onStart() {
-            super.onStart()
-            SettingApplication.addServiceStateListener(this, true)
-        }
-
-        override fun onStop() {
-            SettingApplication.removeServiceStateListener(this)
-            super.onStop()
-        }
-
-        override fun onServiceStateChanged(service: XposedService?) {
-            mService = service
-            if (service == null) {
-                activity.actionBar?.title = "Binder is null"
-                return
-            }
-
-            activity.runOnUiThread {
-                // Retrieve appName from the Activity's Intent extras
-                val appName = arguments?.getString(ARGUMENT_APP_NAME)
-                val appPatchInfo = appPatchConfigurations.find { it.appName == appName }
-                if (appPatchInfo == null) throw Exception("AppPatchInfo not found, app_name: $appName")
-                val defaultPatchStates = appPatchInfo.patches.associate { it.name to it.use }
-
-                val screen = preferenceManager.createPreferenceScreen(context)
-
-                val remotePrefs = service.getRemotePreferences(appPatchInfo.packageName)
-
-                object : Preference(context) {
-                    @Deprecated("Deprecated in Java")
-                    override fun onBindView(view: View) {
-                        super.onBindView(view)
-                        view.findViewById<Button>(R.id.button_default).setOnClickListener {
-                            restoreDefaultPreferences(remotePrefs, defaultPatchStates)
-                        }
-                        view.findViewById<Button>(R.id.button_none).setOnClickListener {
-                            setAllPreferences(remotePrefs, false)
-                        }
-                        val isInstalled = runCatching {
-                            context.packageManager.getPackageInfo(appPatchInfo.packageName, 0)
-                        }.isSuccess
-
-                        view.findViewById<Button>(R.id.button_app_info).apply {
-                            if (!isInstalled) visibility = View.GONE
-                            setOnClickListener {
-                                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                                    .setData(Uri.parse("package:${appPatchInfo.packageName}"))
-                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                startActivity(intent)
-                            }
-                        }
-                    }
-                }.apply {
-                    layoutResource = R.layout.preference_header_buttons
-                    screen.addPreference(this)
-                }
-
-                for (patchInfo in appPatchInfo.patches.sortedBy { it.name }) {
-                    if (patchInfo.name == "") continue
-                    if (patchInfo.name.startsWith("<")) continue
-                    CheckBoxPreference(context).apply {
-                        key = patchInfo.name // Pref Key
-                        title = patchInfo.name
-                        summary = patchInfo.description
-                        isChecked = remotePrefs.getBoolean(patchInfo.name, patchInfo.use)
-
-                        setOnPreferenceChangeListener { _, newValue ->
-                            val enabled = newValue as Boolean
-                            remotePrefs.edit().putBoolean(key, enabled).apply()
-
-                            val vibrator =
-                                context.getSystemService(VIBRATOR_SERVICE) as Vibrator?
-                            if (vibrator?.hasVibrator() ?: false) {
-                                vibrator.vibrate(50)
-                            }
-                            true
-                        }
-                        screen.addPreference(this)
-                    }
-                }
-
-                preferenceScreen = screen
-            }
-        }
-
-        fun setAllPreferences(prefs: SharedPreferences, enable: Boolean) {
-            if (!isAdded) return
-            val editor = prefs.edit()
-            for (i in 0 until preferenceScreen.preferenceCount) {
-                val preference = preferenceScreen.getPreference(i)
-                if (preference is CheckBoxPreference) {
-                    preference.isChecked = enable
-                    editor.putBoolean(preference.key, enable)
-                }
+        findViewById<View>(R.id.btn_default_patches)?.setOnClickListener {
+            val service = mService ?: return@setOnClickListener
+            val remotePrefs = service.getRemotePreferences(appInfo.packageName)
+            val editor = remotePrefs.edit()
+            for (patch in appInfo.patches) {
+                if (patch.name.isEmpty() || patch.name.startsWith("<")) continue
+                editor.putBoolean(patch.name, patch.use)
+                patchSwitchMap[patch.name]?.isChecked = patch.use
             }
             editor.apply()
+            vibrate()
+            updatePatchCountBadge()
+            Utils.showToastLong("Default settings applied")
         }
 
-        fun restoreDefaultPreferences(prefs: SharedPreferences,defaultPatchStates: Map<String, Boolean>) {
-            if (!isAdded) return
-            val editor = prefs.edit()
-            for (i in 0 until preferenceScreen.preferenceCount) {
-                val preference = preferenceScreen.getPreference(i)
-                if (preference is CheckBoxPreference) {
-                    preference.isChecked =
-                        defaultPatchStates[preference.key] ?: preference.isChecked
-                    editor.putBoolean(preference.key, preference.isChecked)
-                }
+        findViewById<View>(R.id.btn_all_patches)?.setOnClickListener {
+            val service = mService ?: return@setOnClickListener
+            val remotePrefs = service.getRemotePreferences(appInfo.packageName)
+            val editor = remotePrefs.edit()
+            for (patch in appInfo.patches) {
+                if (patch.name.isEmpty() || patch.name.startsWith("<")) continue
+                editor.putBoolean(patch.name, true)
+                patchSwitchMap[patch.name]?.isChecked = true
             }
             editor.apply()
+            vibrate()
+            updatePatchCountBadge()
+            Utils.showToastLong("All patches enabled")
+        }
+
+        findViewById<View>(R.id.btn_none_patches)?.setOnClickListener {
+            val service = mService ?: return@setOnClickListener
+            val remotePrefs = service.getRemotePreferences(appInfo.packageName)
+            val editor = remotePrefs.edit()
+            for (patch in appInfo.patches) {
+                if (patch.name.isEmpty() || patch.name.startsWith("<")) continue
+                editor.putBoolean(patch.name, false)
+                patchSwitchMap[patch.name]?.isChecked = false
+            }
+            editor.apply()
+            vibrate()
+            updatePatchCountBadge()
+            Utils.showToastLong("All patches disabled")
+        }
+
+        findViewById<View>(R.id.btn_app_info)?.setOnClickListener {
+            try {
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.parse("package:${appInfo.packageName}")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(intent)
+            } catch (_: Throwable) {
+                Utils.showToastLong("Could not open app details")
+            }
+        }
+    }
+
+    private fun populatePatches() {
+        val appInfo = currentAppInfo ?: return
+        val service = mService ?: return
+        val container = findViewById<LinearLayout>(R.id.container_patches) ?: return
+        container.removeAllViews()
+        patchSwitchMap.clear()
+
+        val remotePrefs = service.getRemotePreferences(appInfo.packageName)
+        val inflater = LayoutInflater.from(this)
+
+        val validPatches = appInfo.patches
+            .filter { it.name.isNotEmpty() && !it.name.startsWith("<") }
+            .sortedBy { it.name }
+
+        for ((index, patch) in validPatches.withIndex()) {
+            val itemView = inflater.inflate(R.layout.ksu_patch_item, container, false)
+            val titleView = itemView.findViewById<TextView>(R.id.patch_item_title)
+            val descView = itemView.findViewById<TextView>(R.id.patch_item_desc)
+            val switchView = itemView.findViewById<Switch>(R.id.patch_item_switch)
+
+            titleView.text = patch.name
+            descView.text = if (patch.description.isNotEmpty()) patch.description else "Modifies runtime behavior for this app"
+            val isEnabled = remotePrefs.getBoolean(patch.name, patch.use)
+            switchView.isChecked = isEnabled
+            patchSwitchMap[patch.name] = switchView
+
+            itemView.setOnClickListener {
+                val newState = !switchView.isChecked
+                switchView.isChecked = newState
+                remotePrefs.edit().putBoolean(patch.name, newState).apply()
+                vibrate()
+                updatePatchCountBadge()
+            }
+
+            container.addView(itemView)
+
+            if (index < validPatches.size - 1) {
+                val divider = View(this).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        1
+                    ).apply {
+                        setMargins(16, 0, 16, 0)
+                    }
+                    setBackgroundColor(getColor(R.color.ksu_card_stroke))
+                }
+                container.addView(divider)
+            }
+        }
+        updatePatchCountBadge()
+    }
+
+    private fun updatePatchCountBadge() {
+        val appInfo = currentAppInfo ?: return
+        val service = mService
+        val badge = findViewById<TextView>(R.id.patch_header_count) ?: return
+
+        val validPatches = appInfo.patches.filter { it.name.isNotEmpty() && !it.name.startsWith("<") }
+        if (service != null) {
+            val remotePrefs = service.getRemotePreferences(appInfo.packageName)
+            val activeCount = validPatches.count { remotePrefs.getBoolean(it.name, it.use) }
+            badge.text = "$activeCount / ${validPatches.size} Active"
+        } else {
+            val defaultCount = validPatches.count { it.use }
+            badge.text = "$defaultCount / ${validPatches.size} Patches"
+        }
+    }
+
+    private fun vibrate() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val manager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+                manager?.defaultVibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+            } else {
+                @Suppress("DEPRECATION")
+                val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+                @Suppress("DEPRECATION")
+                vibrator?.vibrate(30)
+            }
+        } catch (_: Throwable) {}
+    }
+
+    override fun onStart() {
+        super.onStart()
+        SettingApplication.addServiceStateListener(this, true)
+    }
+
+    override fun onStop() {
+        SettingApplication.removeServiceStateListener(this)
+        super.onStop()
+    }
+
+    override fun onServiceStateChanged(service: XposedService?) {
+        mService = service
+        runOnUiThread {
+            if (service != null) {
+                populatePatches()
+            } else {
+                updatePatchCountBadge()
+            }
         }
     }
 }

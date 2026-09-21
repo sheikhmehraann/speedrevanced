@@ -125,11 +125,11 @@ public class MorpheAboutPreference extends Preference {
     private String createDialogHtml(List<WebLink> aboutLinks, @Nullable String currentVersion) {
         StringBuilder html = new StringBuilder(AboutDialogStyle.documentStart());
 
-        //region Add NexAlloy
+        //region Add Speed Revanced
         // Header section.
         html.append("<div class=\"dialog-header\">");
 
-        html.append("<div class=\"app-name\">NexAlloy</div>");
+        html.append("<div class=\"app-name\">Speed Revanced</div>");
 
         html.append(String.format("""
                     <div class="info-card">
@@ -147,10 +147,7 @@ public class MorpheAboutPreference extends Preference {
                 .append("<div class=\"settings-group\">");
 
         var myLinks = new WebLink[]{
-                new WebLink("GitHub", null, "https://github.com/NexAlloy/NexAlloy"),
-                new WebLink("Discord", null, "https://discord.gg/QWUrAA2mKq"),
-                new WebLink("Telegram", null, "https://t.me/ReVancedXposed"),
-                new WebLink("Donate", null, "https://afdian.com/a/ChsBuffer"),
+                new WebLink("GitHub", null, "https://github.com/sheikhmehraann/speedrevanced"),
         };
 
         // Link buttons with per-URL SVG icons.

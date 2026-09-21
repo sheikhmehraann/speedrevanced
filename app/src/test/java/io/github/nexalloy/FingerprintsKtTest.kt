@@ -228,11 +228,11 @@ class FingerprintsKtTest(val apkPath: Path) {
                 }.toList().toMutableList()
 
         val packageNames =
-            findFingerprintPackages("src/main/java/io/github/nexalloy/morphe/$app")
+            findFingerprintPackages("src/main/java/io/github/speedrevanced/morphe/$app")
 
         // Add shared fingerprints packages.
         if (app == "youtube"  || app == "music"){
-            packageNames.addAll(findFingerprintPackages("src/main/java/io/github/nexalloy/morphe/shared"))
+            packageNames.addAll(findFingerprintPackages("src/main/java/io/github/speedrevanced/morphe/shared"))
         }
 
         packageNames.distinct().forEach { packageName ->

@@ -86,7 +86,7 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
     private fun setupUpdateChecker() {
         val btnUpdates = findViewById<View>(R.id.btn_check_updates)
         val textVersion = findViewById<TextView>(R.id.text_version_info)
-        textVersion?.text = "Version: ${BuildConfig.VERSION_NAME} (${BuildConfig.COMMIT_HASH})"
+        textVersion?.text = "v${BuildConfig.VERSION_NAME} (${BuildConfig.COMMIT_HASH})"
 
         btnUpdates?.setOnClickListener {
             UpdateChecker().apply {
@@ -111,14 +111,25 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
 
         for ((index, appInfo) in appPatchConfigurations.withIndex()) {
             val itemView = inflater.inflate(R.layout.ksu_app_item, container, false)
+            val avatarView = itemView.findViewById<TextView>(R.id.app_item_avatar)
             val titleView = itemView.findViewById<TextView>(R.id.app_item_title)
             val pkgView = itemView.findViewById<TextView>(R.id.app_item_pkg)
             val countView = itemView.findViewById<TextView>(R.id.app_item_count)
 
+            avatarView.text = appInfo.appName.firstOrNull()?.uppercase() ?: "A"
             titleView.text = appInfo.appName
             pkgView.text = appInfo.packageName
-            val activePatches = appInfo.patches.count { it.name.isNotEmpty() && !it.name.startsWith("<") }
-            countView.text = "$activePatches Patches"
+
+            val validPatches = appInfo.patches.filter { it.name.isNotEmpty() && !it.name.startsWith("<") }
+            val service = mService
+            if (service != null) {
+                val remotePrefs = service.getRemotePreferences(appInfo.packageName)
+                val activeCount = validPatches.count { remotePrefs.getBoolean(it.name, it.use) }
+                countView.text = "$activeCount / ${validPatches.size}"
+            } else {
+                val defaultCount = validPatches.count { it.use }
+                countView.text = "$defaultCount / ${validPatches.size}"
+            }
 
             itemView.setOnClickListener {
                 val intent = Intent(this, AppPatchSettingsActivity::class.java).apply {
@@ -135,13 +146,18 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         1
                     ).apply {
-                        setMargins(20, 0, 20, 0)
+                        setMargins(16, 0, 16, 0)
                     }
                     setBackgroundColor(getColor(R.color.ksu_card_stroke))
                 }
                 container.addView(divider)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        populateAppList()
     }
 
     override fun onStart() {
@@ -158,16 +174,31 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
         mService = service
         runOnUiThread {
             val badge = findViewById<TextView>(R.id.speed_status_badge)
-            val textWorkingMode = findViewById<TextView>(R.id.text_working_mode)
+            val heroIcon = findViewById<TextView>(R.id.hero_icon_badge)
+            val heroTitle = findViewById<TextView>(R.id.hero_status_title)
+            val heroSubtitle = findViewById<TextView>(R.id.hero_status_subtitle)
+            val frameworkInfo = findViewById<TextView>(R.id.text_framework_info)
+
             if (service != null) {
                 badge?.text = "Active"
                 badge?.setTextColor(getColor(R.color.ksu_accent))
-                textWorkingMode?.text = "LSPosed System Hook Active"
+                heroIcon?.text = "✓"
+                heroIcon?.setTextColor(getColor(R.color.ksu_accent))
+                heroTitle?.text = "Working"
+                heroTitle?.setTextColor(getColor(R.color.ksu_accent))
+                heroSubtitle?.text = "Speed Revanced is active"
+                frameworkInfo?.text = "LSPosed (Zygisk) System Hook"
             } else {
                 badge?.text = "Inactive"
                 badge?.setTextColor(getColor(R.color.ksu_text_muted))
-                textWorkingMode?.text = "Module Inactive (Enable in LSPosed Manager)"
+                heroIcon?.text = "!"
+                heroIcon?.setTextColor(getColor(R.color.ksu_warning))
+                heroTitle?.text = "Not Active"
+                heroTitle?.setTextColor(getColor(R.color.ksu_warning))
+                heroSubtitle?.text = "Enable module in LSPosed Manager"
+                frameworkInfo?.text = "LSPosed Service Disconnected"
             }
+            populateAppList()
         }
     }
 
