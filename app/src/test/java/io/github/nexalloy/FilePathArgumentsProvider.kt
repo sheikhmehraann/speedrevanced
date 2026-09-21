@@ -1,4 +1,4 @@
-package io.github.nexalloy
+package io.github.speedrevanced
 
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.params.provider.Arguments

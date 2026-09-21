@@ -1,7 +1,7 @@
-package io.github.nexalloy
+package io.github.speedrevanced
 
-import io.github.nexalloy.morphe.ResourceFinder
-import io.github.nexalloy.morphe.resourceMappings
+import io.github.speedrevanced.morphe.ResourceFinder
+import io.github.speedrevanced.morphe.resourceMappings
 import jadx.api.JadxArgs
 import jadx.api.JadxDecompiler
 import jadx.api.security.JadxSecurityFlag

@@ -1,6 +1,6 @@
-package io.github.nexalloy
+package io.github.speedrevanced
 
-import io.github.nexalloy.morphe.Fingerprint
+import io.github.speedrevanced.morphe.Fingerprint
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory

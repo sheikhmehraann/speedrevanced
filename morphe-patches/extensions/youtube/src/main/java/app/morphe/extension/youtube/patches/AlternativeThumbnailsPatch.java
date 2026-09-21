@@ -2,7 +2,7 @@ package app.morphe.extension.youtube.patches;
 
 import static app.morphe.extension.shared.StringRef.str;
 
-import static io.github.nexalloy.morphe.youtube.misc.imageurlhook.CronetImageUrlHookKt.getHookedUrl;
+import static io.github.speedrevanced.morphe.youtube.misc.imageurlhook.CronetImageUrlHookKt.getHookedUrl;
 
 import android.net.Uri;
 

@@ -35,7 +35,7 @@ import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
-import io.github.nexalloy.BuildConfig;
+import io.github.speedrevanced.BuildConfig;
 
 /**
  * Opens a dialog showing official links.

@@ -1,4 +1,4 @@
-package io.github.nexalloy
+package io.github.speedrevanced
 
 import jadx.api.JadxDecompiler
 import jadx.api.plugins.input.data.attributes.JadxAttrType

@@ -10,7 +10,7 @@
 
 package app.morphe.extension.youtube.shared;
 
-import static io.github.nexalloy.morphe.youtube.misc.navigation.NavigationBarHookPatchKt.onNavigationTabCreated;
+import static io.github.speedrevanced.morphe.youtube.misc.navigation.NavigationBarHookPatchKt.onNavigationTabCreated;
 
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
