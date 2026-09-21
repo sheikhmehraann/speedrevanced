@@ -52,6 +52,26 @@ class AppPatchSettingsActivity : Activity(), SettingApplication.ServiceStateList
         val appInfo = currentAppInfo ?: return
         findViewById<TextView>(R.id.patch_header_title)?.text = appInfo.appName
         findViewById<TextView>(R.id.patch_header_pkg)?.text = appInfo.packageName
+        findViewById<TextView>(R.id.profile_app_name)?.text = appInfo.appName
+
+        val iconView = findViewById<ImageView>(R.id.profile_app_icon)
+        val avatarView = findViewById<TextView>(R.id.profile_app_avatar)
+        val versionView = findViewById<TextView>(R.id.profile_app_version)
+
+        try {
+            val appIcon = packageManager.getApplicationIcon(appInfo.packageName)
+            val pkgInfo = packageManager.getPackageInfo(appInfo.packageName, 0)
+            iconView?.setImageDrawable(appIcon)
+            iconView?.visibility = View.VISIBLE
+            avatarView?.visibility = View.GONE
+            versionView?.text = "Installed (v${pkgInfo.versionName ?: "unknown"})"
+        } catch (_: Throwable) {
+            avatarView?.text = appInfo.appName.firstOrNull()?.uppercase() ?: "A"
+            avatarView?.visibility = View.VISIBLE
+            iconView?.visibility = View.GONE
+            versionView?.text = "Not Installed"
+        }
+
         updatePatchCountBadge()
     }
 

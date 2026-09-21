@@ -7,8 +7,15 @@
     <color name="ksu_card">#FF242424</color>
     <color name="ksu_card_stroke">#FF333333</color>
     
-    <!-- SukiSU Crimson / Violet Accent or KSU Emerald Green -->
+    <!-- SukiSU & KSU Status Card Colors -->
+    <color name="ksu_status_working_bg">#FF1A3825</color>
+    <color name="ksu_status_working_stroke">#FF2E7D32</color>
+    <color name="ksu_status_inactive_bg">#FF2E1F21</color>
+    <color name="ksu_status_inactive_stroke">#FFC62828</color>
+
+    <!-- KSU Emerald Green Accent -->
     <color name="ksu_accent">#FF4CAF50</color>
+    <color name="ksu_accent_light">#FF81C784</color>
     <color name="ksu_accent_container">#1A4CAF50</color>
     <color name="ksu_accent_glow">#334CAF50</color>
     <color name="ksu_warning">#FFFF9800</color>
