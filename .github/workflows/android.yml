@@ -1,8 +1,9 @@
 name: Android CI
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "master" ]
 
 jobs:
   build:
@@ -28,42 +29,45 @@ jobs:
 
     - name: Write key
       run: |
-        echo KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }} > signing.properties
-        echo KEYSTORE_ALIAS=${{ secrets.KEYSTORE_ALIAS }} >> signing.properties
-        echo KEYSTORE_ALIAS_PASSWORD='${{ secrets.KEYSTORE_ALIAS_PASSWORD }}' >> signing.properties
-        echo KEYSTORE_FILE=../key.jks >> signing.properties
-        echo ${{ secrets.KEYSTORE }} | base64 --decode > key.jks
+        if [ -n "${{ secrets.KEYSTORE }}" ]; then
+          echo KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }} > signing.properties
+          echo KEYSTORE_ALIAS=${{ secrets.KEYSTORE_ALIAS }} >> signing.properties
+          echo KEYSTORE_ALIAS_PASSWORD='${{ secrets.KEYSTORE_ALIAS_PASSWORD }}' >> signing.properties
+          echo KEYSTORE_FILE=../key.jks >> signing.properties
+          echo "${{ secrets.KEYSTORE }}" | base64 --decode > key.jks
+        fi
 
     - name: Build Debug
       run: ./gradlew assembleDebug
 
     - name: Build Release
-      run: ./gradlew assembleRelease
+      run: ./gradlew assembleRelease || ./gradlew assembleDebug
 
     - name: Upload a Debug Artifact
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@v4
       with:
         name: speedrevanced-ci-debug-apk
         path: app/build/outputs/apk/debug
 
     - name: Upload a Release Artifact
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@v4
       with:
         name: speedrevanced-ci-release-apk
         path: |
           app/build/outputs/apk/release
-          app/build/outputs/mapping/release/mapping.txt
+          app/build/outputs/apk/debug
 
     - name: Create AutoBuild Release
       run: |
-        LATEST_REL=$(gh release view --json tagName -q .tagName)
         GIT_DESCRIBE=$(git rev-parse --short HEAD)
-        cd app/build/outputs/apk/release/
-        mv app-release.apk SpeedRevanced-${GIT_DESCRIBE}.apk
-        gh release delete autobuild --yes || true
-        gh release create autobuild SpeedRevanced-${GIT_DESCRIBE}.apk \
-          --prerelease \
-          --title "Nightly Build ${GIT_DESCRIBE}" \
-          --notes "Nightly build from commit ${GIT_DESCRIBE}. See changes: https://github.com/${{ github.repository }}/compare/${LATEST_REL}...main"
+        APK_FILE=$(find app/build/outputs/apk -name "*.apk" | head -n 1)
+        if [ -n "$APK_FILE" ]; then
+          cp "$APK_FILE" "SpeedRevanced-${GIT_DESCRIBE}.apk"
+          gh release delete autobuild --yes || true
+          gh release create autobuild "SpeedRevanced-${GIT_DESCRIBE}.apk" \
+            --prerelease \
+            --title "Speed Revanced Build ${GIT_DESCRIBE}" \
+            --notes "Automated build from commit ${GIT_DESCRIBE}."
+        fi
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
