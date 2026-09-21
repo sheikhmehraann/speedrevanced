@@ -44,13 +44,13 @@ jobs:
       run: ./gradlew assembleRelease || ./gradlew assembleDebug
 
     - name: Upload a Debug Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: speedrevanced-ci-debug-apk
         path: app/build/outputs/apk/debug
 
     - name: Upload a Release Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: speedrevanced-ci-release-apk
         path: |
