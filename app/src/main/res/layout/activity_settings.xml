@@ -233,22 +233,29 @@
                     android:orientation="vertical"
                     android:padding="14dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Applications"
-                        android:textColor="@color/ksu_text_secondary"
-                        android:textSize="12sp" />
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_ksu_apps"
+                        android:contentDescription="Apps" />
 
                     <TextView
                         android:id="@+id/metric_apps_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="9 Configured"
+                        android:layout_marginTop="8dp"
+                        android:text="9 Apps"
                         android:textColor="@color/ksu_text_primary"
-                        android:textSize="16sp"
+                        android:textSize="17sp"
                         android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Configured"
+                        android:textColor="@color/ksu_text_secondary"
+                        android:textSize="11sp" />
                 </LinearLayout>
 
                 <!-- Metric 2: Patches -->
@@ -261,53 +268,71 @@
                     android:orientation="vertical"
                     android:padding="14dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Patches"
-                        android:textColor="@color/ksu_text_secondary"
-                        android:textSize="12sp" />
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_ksu_shield"
+                        android:contentDescription="Patches" />
 
                     <TextView
                         android:id="@+id/metric_patches_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="49 Total"
+                        android:layout_marginTop="8dp"
+                        android:text="49 Patches"
                         android:textColor="@color/ksu_text_primary"
-                        android:textSize="16sp"
+                        android:textSize="17sp"
                         android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Active &amp; Available"
+                        android:textColor="@color/ksu_text_secondary"
+                        android:textSize="11sp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Card 2: Module Settings & Controls -->
+            <!-- Section 1: Module Settings -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="8dp"
-                android:text="Module Settings"
+                android:text="MODULE SETTINGS"
                 android:textColor="@color/ksu_text_secondary"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ksu_card_bg"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:orientation="vertical">
 
+                <!-- Hide from Launcher Row -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:paddingStart="16dp"
+                    android:paddingTop="14dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="14dp">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_ksu_eye"
+                        android:contentDescription="Hide icon" />
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
                         android:layout_weight="1"
                         android:orientation="vertical">
 
@@ -316,13 +341,14 @@
                             android:layout_height="wrap_content"
                             android:text="Hide from Launcher"
                             android:textColor="@color/ksu_text_primary"
-                            android:textSize="14sp" />
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="Hides app icon from drawer. Open via LSPosed Manager."
+                            android:text="Hides icon from drawer. Open via LSPosed."
                             android:textColor="@color/ksu_text_muted"
                             android:textSize="11sp" />
                     </LinearLayout>
@@ -333,13 +359,14 @@
                         android:layout_height="wrap_content" />
                 </LinearLayout>
 
+                <!-- Indented Divider -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginStart="52dp"
                     android:background="@color/ksu_card_stroke" />
 
+                <!-- Check for Updates Row -->
                 <LinearLayout
                     android:id="@+id/btn_check_updates"
                     android:layout_width="match_parent"
@@ -348,11 +375,22 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:paddingStart="16dp"
+                    android:paddingTop="14dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="14dp">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_ksu_sync"
+                        android:contentDescription="Check updates" />
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
                         android:layout_weight="1"
                         android:orientation="vertical">
 
@@ -361,7 +399,8 @@
                             android:layout_height="wrap_content"
                             android:text="Check for Updates"
                             android:textColor="@color/ksu_text_primary"
-                            android:textSize="14sp" />
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/text_update_subtitle"
@@ -376,23 +415,24 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:background="@drawable/ksu_btn_bg"
                         android:text="Check"
                         android:textColor="@color/ksu_accent"
-                        android:textSize="13sp"
+                        android:textSize="12sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Card 3: Target Applications -->
+            <!-- Section 2: Configured Applications -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="8dp"
-                android:text="Configured Applications"
+                android:text="CONFIGURED APPLICATIONS"
                 android:textColor="@color/ksu_text_secondary"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <LinearLayout
@@ -400,19 +440,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ksu_card_bg"
-                android:orientation="vertical"
-                android:padding="4dp" />
+                android:orientation="vertical" />
 
-            <!-- Card 4: Information & Repository -->
+            <!-- Section 3: About & Repository -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="8dp"
-                android:text="Repository"
+                android:text="ABOUT"
                 android:textColor="@color/ksu_text_secondary"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <LinearLayout
@@ -424,20 +463,31 @@
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="16dp">
+                android:paddingStart="16dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="14dp">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_ksu_github"
+                    android:contentDescription="GitHub" />
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
                     android:layout_weight="1"
                     android:orientation="vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="GitHub Repository"
+                        android:text="Speed Revanced Project"
                         android:textColor="@color/ksu_text_primary"
-                        android:textSize="14sp" />
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -451,9 +501,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/ksu_btn_bg"
                     android:text="Open"
                     android:textColor="@color/ksu_accent"
-                    android:textSize="13sp"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
             </LinearLayout>
 

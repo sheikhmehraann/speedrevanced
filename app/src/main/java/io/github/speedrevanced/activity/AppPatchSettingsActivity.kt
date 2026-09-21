@@ -173,12 +173,13 @@ class AppPatchSettingsActivity : Activity(), SettingApplication.ServiceStateList
             container.addView(itemView)
 
             if (index < validPatches.size - 1) {
+                val marginPx = (16 * resources.displayMetrics.density).toInt()
                 val divider = View(this).apply {
                     layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         1
                     ).apply {
-                        setMargins(16, 0, 16, 0)
+                        setMargins(marginPx, 0, marginPx, 0)
                     }
                     setBackgroundColor(getColor(R.color.ksu_card_stroke))
                 }
