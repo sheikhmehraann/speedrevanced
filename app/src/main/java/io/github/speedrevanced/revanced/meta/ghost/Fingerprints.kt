@@ -1,15 +1,15 @@
 package io.github.speedrevanced.revanced.meta.ghost
 
 import io.github.speedrevanced.morphe.findMethodDirect
-import io.github.speedrevanced.morphe.paramCount
-import io.github.speedrevanced.morphe.returnType
+import io.github.speedrevanced.morphe.parameters
+import io.github.speedrevanced.morphe.returns
 import io.github.speedrevanced.morphe.strings
 
 val storySeenFingerprint = findMethodDirect {
     val r1 = findMethod {
         matcher {
-            returnType("void")
-            paramCount(0)
+            returns("void")
+            parameters(emptyList())
             strings("media/seen/")
         }
     }

@@ -1,13 +1,13 @@
 package io.github.speedrevanced.revanced.meta.ads
 
 import io.github.speedrevanced.morphe.findMethodDirect
-import io.github.speedrevanced.morphe.returnType
+import io.github.speedrevanced.morphe.returns
 import io.github.speedrevanced.morphe.strings
 
 val adInjectorFingerprint = findMethodDirect {
     val r1 = findMethod {
         matcher {
-            returnType("boolean")
+            returns("boolean")
             strings("Is ad pod")
         }
     }
@@ -15,7 +15,7 @@ val adInjectorFingerprint = findMethodDirect {
 
     val r2 = findMethod {
         matcher {
-            returnType("boolean")
+            returns("boolean")
             strings("SponsoredContentController.insertItem")
         }
     }
@@ -23,7 +23,7 @@ val adInjectorFingerprint = findMethodDirect {
 
     findMethod {
         matcher {
-            returnType("boolean")
+            returns("boolean")
             strings("sponsored_content")
         }
     }.first()
