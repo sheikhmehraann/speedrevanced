@@ -53,28 +53,35 @@ class MainHook : XposedModule() {
 
 context(xposed: XposedInterface)
 fun inContext(lpparam: PackageReadyParam, f: (Application) -> Unit) {
-    val className = lpparam.applicationInfo.className
-    val appClazz = runCatching {
-        if (!className.isNullOrEmpty()) {
-            XposedHelpers.findClass(className, lpparam.classLoader)
-        } else {
-            Application::class.java
-        }
-    }.getOrElse {
-        Application::class.java
-    }
-
-    val onCreateMethod = runCatching {
-        appClazz.getMethod("onCreate")
-    }.getOrElse {
-        Application::class.java.getMethod("onCreate")
-    }
-
-    onCreateMethod.hookMethod {
-        before {
-            val app = it.thisObject as? Application ?: return@before
+    var initialized = false
+    val onAppReady: (Application) -> Unit = { app ->
+        if (!initialized) {
+            initialized = true
             Utils.setContext(app)
             f(app)
         }
+    }
+
+    val className = lpparam.applicationInfo.className
+    if (!className.isNullOrEmpty()) {
+        runCatching {
+            val appClazz = XposedHelpers.findClass(className, lpparam.classLoader)
+            XposedHelpers.findAndHookMethod(appClazz, "onCreate", object : de.robv.android.xposed.XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    val app = param.thisObject as? Application ?: return
+                    onAppReady(app)
+                }
+            })
+        }
+    }
+
+    // Always hook Application.onCreate as fallback for apps with customized or default Application
+    runCatching {
+        XposedHelpers.findAndHookMethod(Application::class.java, "onCreate", object : de.robv.android.xposed.XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val app = param.thisObject as? Application ?: return
+                onAppReady(app)
+            }
+        })
     }
 }

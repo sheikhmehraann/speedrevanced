@@ -9,13 +9,13 @@
     <queries>
         <package android:name="com.google.android.youtube" />
         <package android:name="com.google.android.apps.youtube.music" />
-        <package android:name="com.reddit.frontpage" />
-        <package android:name="com.google.android.apps.photos" />
-        <package android:name="com.microblink.photomath" />
         <package android:name="com.instagram.android" />
         <package android:name="com.instagram.barcelona" />
-        <package android:name="com.strava" />
-        <package android:name="com.alltrails.alltrails" />
+        <package android:name="org.telegram.messenger" />
+        <package android:name="org.telegram.messenger.web" />
+        <package android:name="org.telegram.plus" />
+        <package android:name="tw.nekomimi.nekogram" />
+        <package android:name="nekox.messenger" />
     </queries>
 
     <application
@@ -28,17 +28,7 @@
         android:description="@string/app_description"
         tools:targetApi="31">
 
-        <activity-alias
-            android:name=".LauncherAlias"
-            android:enabled="false"
-            android:exported="true"
-            android:targetActivity=".activity.SettingsActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
+        <!-- Single Launcher Alias disabled by default for complete hiding upon install -->
         <activity-alias
             android:name=".activity.SettingsActivityAlias"
             android:enabled="false"

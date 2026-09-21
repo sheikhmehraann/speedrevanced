@@ -165,11 +165,16 @@ class PatchExecutor(
     // cache
     private val moduleRel = BuildConfig.COMMIT_HASH
     private var cache = SharedPrefCache(appContext)
-    private var dexkit = run {
-        System.loadLibrary("dexkit")
-        DexKitCacheBridge.init(cache)
-        DexKitCacheBridge.create("", lpparam.applicationInfo.sourceDir)
-    }
+    private var _dexkit: DexKitCacheBridge? = null
+    private val dexkit: DexKitCacheBridge
+        get() {
+            if (_dexkit == null) {
+                System.loadLibrary("dexkit")
+                DexKitCacheBridge.init(cache)
+                _dexkit = DexKitCacheBridge.create("", lpparam.applicationInfo.sourceDir)
+            }
+            return _dexkit!!
+        }
 
     fun applyPatches(patches: Array<Patch>) {
         this.patches = patches
@@ -180,7 +185,8 @@ class PatchExecutor(
                 finalizePatching()
                 logDebugInfo()
             } finally {
-                dexkit.close()
+                _dexkit?.close()
+                _dexkit = null
             }
         }
         Logger.printDebug { "${lpparam.packageName} handleLoadPackage: ${t}ms" }
