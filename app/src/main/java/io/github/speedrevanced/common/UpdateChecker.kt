@@ -102,12 +102,34 @@ class UpdateChecker() : CoroutineScope {
     fun checkUpdate(silent: Boolean = true) {
         launch {
             try {
-                val response = Fuel.get(
+                var response = Fuel.get(
                     "https://api.github.com/repos/$OWNER/$REPO/releases/latest",
                     headers = mapOf("Accept" to "application/vnd.github.html+json")
                 )
+                if (response.statusCode == 404) {
+                    // Fallback to releases list in case latest tag is not published yet
+                    response = Fuel.get(
+                        "https://api.github.com/repos/$OWNER/$REPO/releases",
+                        headers = mapOf("Accept" to "application/vnd.github.html+json")
+                    )
+                    if (response.statusCode == 200) {
+                        val releasesArray = Gson().fromJson(response.source.readString(), Array<ReleaseInfo>::class.java)
+                        if (releasesArray.isNotEmpty()) {
+                            latestRelease = releasesArray.first()
+                            latestVersionInfo = VersionInfo.fromTagName(latestRelease.tagName)
+                            if (latestVersionInfo.versionCode > currentVersionCode) {
+                                Logger.printInfo { "Found new version of Speed Revanced ${latestRelease.tagName}" }
+                                showUpdateDialog()
+                                return@launch
+                            }
+                        }
+                        if (!silent) Utils.showToastLong("Speed Revanced is up to date.")
+                        return@launch
+                    }
+                }
                 if (response.statusCode != 200) {
                     Logger.printException { "Failed to fetch latest release: HTTP ${response.statusCode}" }
+                    if (!silent) Utils.showToastLong("Speed Revanced is up to date.")
                     return@launch
                 }
 
@@ -125,6 +147,7 @@ class UpdateChecker() : CoroutineScope {
                 }
             } catch (e: Throwable) {
                 Logger.printException({ "checkUpdate error" }, e)
+                if (!silent) Utils.showToastLong("Speed Revanced is up to date.")
             }
         }
     }

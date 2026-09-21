@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.preference.Preference
 import android.preference.PreferenceCategory
 import android.preference.PreferenceFragment
+import android.preference.SwitchPreference
 import android.text.format.DateUtils
 import android.view.Menu
 import android.view.MenuItem
@@ -179,6 +180,26 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
             }
 
             addPreferencesFromResource(R.xml.license_prefs)
+
+            val aliasName = ComponentName(context, SettingsActivity::class.java.name + "Alias")
+            val isHidden = context.packageManager.getComponentEnabledSetting(aliasName) == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+            SwitchPreference(context).apply {
+                setTitle(R.string.hide_icon_title)
+                setSummary(R.string.hide_icon_summary)
+                isChecked = isHidden
+                setOnPreferenceChangeListener { _, newValue ->
+                    val hide = newValue as Boolean
+                    val status = if (hide) PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                    else PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                    context.packageManager.setComponentEnabledSetting(
+                        aliasName,
+                        status,
+                        PackageManager.DONT_KILL_APP
+                    )
+                    true
+                }
+                rootScreen.addPreference(this)
+            }
 
             Preference(context).apply {
                 setTitle(R.string.check_for_update_title)
