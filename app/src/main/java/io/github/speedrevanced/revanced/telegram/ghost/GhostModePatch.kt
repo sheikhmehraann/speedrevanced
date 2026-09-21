@@ -15,16 +15,20 @@ val GhostMode = patch(
 
         for (method in messagesControllerClass.declaredMethods) {
             val name = method.name
-            if (name == "markDialogAsRead" || name.contains("sendMessagesRead", ignoreCase = true) ||
+            // Only hook outgoing network read receipt senders, do NOT break local markDialogAsRead
+            if (name.contains("sendMessagesRead", ignoreCase = true) ||
                 name.contains("sendTyping", ignoreCase = true)) {
                 XposedBridge.hookMethod(method, object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
-                        if (method.returnType == java.lang.Boolean.TYPE || method.returnType == java.lang.Boolean::class.java) {
-                            param.result = false
-                        } else if (method.returnType == java.lang.Integer.TYPE) {
-                            param.result = 0
-                        } else {
-                            param.result = null
+                        val rt = method.returnType
+                        when {
+                            rt == java.lang.Boolean.TYPE || rt == java.lang.Boolean::class.java -> param.result = false
+                            rt == java.lang.Integer.TYPE || rt == java.lang.Integer::class.java -> param.result = 0
+                            rt == java.lang.Long.TYPE || rt == java.lang.Long::class.java -> param.result = 0L
+                            rt == java.lang.Void.TYPE -> param.result = null
+                            else -> {
+                                // Do not alter result for unknown complex return types to avoid crash
+                            }
                         }
                     }
                 })

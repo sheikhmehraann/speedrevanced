@@ -16,20 +16,32 @@ val HideSuggestedFeedItems = patch(
             override fun afterHookedMethod(param: MethodHookParam) {
                 val result = param.result ?: return
                 try {
-                    if (!fieldResolved) {
-                        for (f in result.javaClass.declaredFields) {
-                            if (f.type.simpleName == "Media") {
+                    var hasMedia = false
+                    var isThreadsUnit = false
+                    for (f in result.javaClass.declaredFields) {
+                        val typeName = f.type.simpleName
+                        if (typeName == "Media") {
+                            try {
                                 f.isAccessible = true
-                                mediaField = f
-                                break
-                            }
+                                if (f.get(result) != null) {
+                                    hasMedia = true
+                                    break
+                                }
+                            } catch (_: Throwable) {}
+                        } else if (typeName.contains("Threads") || typeName.startsWith("TextApp") || typeName.startsWith("XDTTextApp")) {
+                            try {
+                                f.isAccessible = true
+                                if (f.get(result) != null) {
+                                    isThreadsUnit = true
+                                }
+                            } catch (_: Throwable) {}
                         }
-                        fieldResolved = true
                     }
-                    val mf = mediaField
-                    if (mf != null && mf.get(result) == null) {
-                        param.result = null
-                    }
+
+                    if (hasMedia) return // real post — never hide
+
+                    // Suggested unit / netego / threads
+                    param.result = null
                 } catch (_: Throwable) {}
             }
         })

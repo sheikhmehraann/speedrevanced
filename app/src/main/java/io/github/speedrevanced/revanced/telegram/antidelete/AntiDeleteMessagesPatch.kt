@@ -15,7 +15,7 @@ val AntiDeleteMessages = patch(
 
         if (messagesStorageClass != null) {
             for (method in messagesStorageClass.declaredMethods) {
-                if (method.name == "markMessagesAsDeleted" || method.name == "emptyHistory") {
+                if (method.name == "markMessagesAsDeleted") {
                     XposedBridge.hookMethod(method, object : XC_MethodHook() {
                         override fun beforeHookedMethod(param: MethodHookParam) {
                             param.result = null

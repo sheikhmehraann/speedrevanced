@@ -16,6 +16,8 @@
         <package android:name="org.telegram.plus" />
         <package android:name="tw.nekomimi.nekogram" />
         <package android:name="nekox.messenger" />
+        <package android:name="com.spotify.music" />
+        <package android:name="com.google.android.apps.photos" />
     </queries>
 
     <application
