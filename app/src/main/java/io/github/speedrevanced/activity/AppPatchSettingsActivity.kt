@@ -37,6 +37,8 @@ class AppPatchSettingsActivity : Activity(), SettingApplication.ServiceStateList
         setContentView(R.layout.activity_app_patch_settings)
         Utils.setContext(this)
 
+        setupWindowInsets()
+
         val appName = intent.getStringExtra(ARGUMENT_APP_NAME)
         currentAppInfo = appPatchConfigurations.find { it.appName == appName }
 
@@ -46,6 +48,26 @@ class AppPatchSettingsActivity : Activity(), SettingApplication.ServiceStateList
 
         setupHeader()
         setupActionButtons()
+    }
+
+    private fun setupWindowInsets() {
+        val root = findViewById<View>(android.R.id.content) ?: return
+        val topBar = findViewById<View>(R.id.btn_back)?.parent as? View ?: return
+        root.setOnApplyWindowInsetsListener { _, insets ->
+            val topInset = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                insets.getInsets(android.view.WindowInsets.Type.statusBars()).top
+            } else {
+                @Suppress("DEPRECATION")
+                insets.systemWindowInsetTop
+            }
+            topBar.setPadding(
+                (16 * resources.displayMetrics.density).toInt(),
+                topInset + (12 * resources.displayMetrics.density).toInt(),
+                (16 * resources.displayMetrics.density).toInt(),
+                (12 * resources.displayMetrics.density).toInt()
+            )
+            insets
+        }
     }
 
     private fun setupHeader() {

@@ -1,5 +1,6 @@
 package io.github.speedrevanced.activity
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
@@ -7,10 +8,16 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
+import android.view.WindowInsets
+import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.Switch
 import android.widget.TextView
 import android.window.OnBackInvokedDispatcher
@@ -20,11 +27,40 @@ import io.github.speedrevanced.BuildConfig
 import io.github.speedrevanced.R
 import io.github.speedrevanced.appPatchConfigurations
 import io.github.speedrevanced.common.UpdateChecker
+import java.io.File
 import kotlin.system.exitProcess
 
 class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
 
     private var mService: XposedService? = null
+    private var currentTab = TAB_HOME
+
+    private lateinit var tabHomeScroll: ScrollView
+    private lateinit var tabAppsLayout: LinearLayout
+    private lateinit var tabSettingsScroll: ScrollView
+
+    private lateinit var topBarTitle: TextView
+    private lateinit var topBarSubtitle: TextView
+
+    private lateinit var navPillHome: FrameLayout
+    private lateinit var navPillApps: FrameLayout
+    private lateinit var navPillSettings: FrameLayout
+
+    private lateinit var navIconHome: ImageView
+    private lateinit var navIconApps: ImageView
+    private lateinit var navIconSettings: ImageView
+
+    private lateinit var navLabelHome: TextView
+    private lateinit var navLabelApps: TextView
+    private lateinit var navLabelSettings: TextView
+
+    private var searchQuery = ""
+
+    companion object {
+        private const val TAB_HOME = 0
+        private const val TAB_APPS = 1
+        private const val TAB_SETTINGS = 2
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,11 +74,132 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
         setContentView(R.layout.activity_settings)
         Utils.setContext(this)
 
+        initViews()
+        setupWindowInsets()
+        setupBottomNavigation()
         setupHeader()
+        setupSystemInfo()
+        setupAppsSearch()
         setupHideIconSwitch()
         setupUpdateChecker()
-        setupRepoButton()
+        setupRepoButtons()
         populateAppList()
+        switchTab(TAB_HOME)
+    }
+
+    private fun initViews() {
+        tabHomeScroll = findViewById(R.id.tab_home_scroll)
+        tabAppsLayout = findViewById(R.id.tab_apps_layout)
+        tabSettingsScroll = findViewById(R.id.tab_settings_scroll)
+
+        topBarTitle = findViewById(R.id.top_bar_title)
+        topBarSubtitle = findViewById(R.id.top_bar_subtitle)
+
+        navPillHome = findViewById(R.id.nav_pill_home)
+        navPillApps = findViewById(R.id.nav_pill_apps)
+        navPillSettings = findViewById(R.id.nav_pill_settings)
+
+        navIconHome = findViewById(R.id.nav_icon_home)
+        navIconApps = findViewById(R.id.nav_icon_apps)
+        navIconSettings = findViewById(R.id.nav_icon_settings)
+
+        navLabelHome = findViewById(R.id.nav_label_home)
+        navLabelApps = findViewById(R.id.nav_label_apps)
+        navLabelSettings = findViewById(R.id.nav_label_settings)
+    }
+
+    private fun setupWindowInsets() {
+        val root = findViewById<View>(R.id.root_layout) ?: return
+        val topBar = findViewById<View>(R.id.top_bar_container)
+        val bottomNav = findViewById<View>(R.id.bottom_nav_bar)
+
+        root.setOnApplyWindowInsetsListener { _, insets ->
+            val topInset = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                insets.getInsets(WindowInsets.Type.statusBars()).top
+            } else {
+                @Suppress("DEPRECATION")
+                insets.systemWindowInsetTop
+            }
+
+            val bottomInset = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                insets.getInsets(WindowInsets.Type.navigationBars()).bottom
+            } else {
+                @Suppress("DEPRECATION")
+                insets.systemWindowInsetBottom
+            }
+
+            topBar?.setPadding(
+                (20 * resources.displayMetrics.density).toInt(),
+                topInset + (12 * resources.displayMetrics.density).toInt(),
+                (20 * resources.displayMetrics.density).toInt(),
+                (12 * resources.displayMetrics.density).toInt()
+            )
+
+            bottomNav?.setPadding(0, 0, 0, bottomInset)
+            insets
+        }
+    }
+
+    private fun setupBottomNavigation() {
+        findViewById<View>(R.id.nav_btn_home)?.setOnClickListener { switchTab(TAB_HOME) }
+        findViewById<View>(R.id.nav_btn_apps)?.setOnClickListener { switchTab(TAB_APPS) }
+        findViewById<View>(R.id.nav_btn_settings)?.setOnClickListener { switchTab(TAB_SETTINGS) }
+
+        findViewById<View>(R.id.btn_metric_apps)?.setOnClickListener { switchTab(TAB_APPS) }
+    }
+
+    private fun switchTab(tab: Int) {
+        currentTab = tab
+
+        val accentColor = getColor(R.color.ksu_accent)
+        val mutedColor = getColor(R.color.ksu_text_muted)
+
+        // Reset all pills and colors
+        navPillHome.background = null
+        navPillApps.background = null
+        navPillSettings.background = null
+
+        navLabelHome.setTextColor(mutedColor)
+        navLabelApps.setTextColor(mutedColor)
+        navLabelSettings.setTextColor(mutedColor)
+
+        navIconHome.setColorFilter(mutedColor)
+        navIconApps.setColorFilter(mutedColor)
+        navIconSettings.setColorFilter(mutedColor)
+
+        tabHomeScroll.visibility = View.GONE
+        tabAppsLayout.visibility = View.GONE
+        tabSettingsScroll.visibility = View.GONE
+
+        when (tab) {
+            TAB_HOME -> {
+                tabHomeScroll.visibility = View.VISIBLE
+                topBarTitle.text = "Speed Revanced"
+                topBarSubtitle.text = "LSPosed Module Manager"
+
+                navPillHome.setBackgroundResource(R.drawable.bg_nav_pill)
+                navLabelHome.setTextColor(accentColor)
+                navIconHome.setColorFilter(accentColor)
+            }
+            TAB_APPS -> {
+                tabAppsLayout.visibility = View.VISIBLE
+                topBarTitle.text = "Applications"
+                topBarSubtitle.text = "Configured target apps"
+
+                navPillApps.setBackgroundResource(R.drawable.bg_nav_pill)
+                navLabelApps.setTextColor(accentColor)
+                navIconApps.setColorFilter(accentColor)
+            }
+            TAB_SETTINGS -> {
+                tabSettingsScroll.visibility = View.VISIBLE
+                topBarTitle.text = "Settings"
+                topBarSubtitle.text = "Module preferences & controls"
+
+                navPillSettings.setBackgroundResource(R.drawable.bg_nav_pill)
+                navLabelSettings.setTextColor(accentColor)
+                navIconSettings.setColorFilter(accentColor)
+            }
+        }
     }
 
     private fun setupHeader() {
@@ -58,6 +215,30 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
         }
     }
 
+    private fun setupSystemInfo() {
+        findViewById<TextView>(R.id.text_device_info)?.text = "${Build.MANUFACTURER} ${Build.MODEL}"
+        findViewById<TextView>(R.id.text_android_info)?.text = "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})"
+
+        val selinuxMode = runCatching {
+            val file = File("/sys/fs/selinux/enforce")
+            if (file.exists() && file.readText().trim() == "1") "Enforcing" else "Permissive"
+        }.getOrDefault("Enforcing")
+
+        findViewById<TextView>(R.id.text_selinux_info)?.text = selinuxMode
+    }
+
+    private fun setupAppsSearch() {
+        val searchInput = findViewById<EditText>(R.id.input_search_apps) ?: return
+        searchInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                searchQuery = s?.toString()?.trim()?.lowercase() ?: ""
+                populateAppList()
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+    }
+
     private fun setupHideIconSwitch() {
         val switchHide = findViewById<Switch>(R.id.switch_hide_icon) ?: return
         val aliasName = ComponentName(this, "$packageName.activity.SettingsActivityAlias")
@@ -71,14 +252,33 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
             } else {
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED
             }
+
             packageManager.setComponentEnabledSetting(
                 aliasName,
                 newState,
                 PackageManager.DONT_KILL_APP
             )
+
+            // Send package changed broadcast
+            try {
+                val intent = Intent(Intent.ACTION_PACKAGE_CHANGED).apply {
+                    data = Uri.parse("package:$packageName")
+                    putExtra(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST, arrayOf(aliasName.className))
+                    putExtra(Intent.EXTRA_DONT_KILL_APP, true)
+                }
+                sendBroadcast(intent)
+            } catch (_: Throwable) {}
+
+            // If root is present, refresh launcher cache
             if (isChecked) {
-                Utils.showToastLong("Icon hidden. Remember to disable 'Force apps to show launcher icons' in LSPosed if icon remains.")
+                try {
+                    Runtime.getRuntime().exec(arrayOf("su", "-c", "am broadcast -a android.intent.action.PACKAGE_CHANGED -d package:$packageName; am force-stop com.transsion.XOSLauncher 2>/dev/null; pkill -f launcher 2>/dev/null"))
+                } catch (_: Throwable) {}
+                Utils.showToastLong("Icon hidden from launcher.")
             } else {
+                try {
+                    Runtime.getRuntime().exec(arrayOf("su", "-c", "am broadcast -a android.intent.action.PACKAGE_CHANGED -d package:$packageName; am force-stop com.transsion.XOSLauncher 2>/dev/null; pkill -f launcher 2>/dev/null"))
+                } catch (_: Throwable) {}
                 Utils.showToastLong("Icon unhidden.")
             }
         }
@@ -87,7 +287,13 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
     private fun setupUpdateChecker() {
         val btnUpdates = findViewById<View>(R.id.btn_check_updates)
         val textVersion = findViewById<TextView>(R.id.text_version_info)
-        textVersion?.text = "v${BuildConfig.VERSION_NAME} (${BuildConfig.COMMIT_HASH})"
+        val textAboutVersion = findViewById<TextView>(R.id.text_about_version)
+        val textAboutCommit = findViewById<TextView>(R.id.text_about_commit)
+
+        val versionString = "v${BuildConfig.VERSION_NAME} (${BuildConfig.COMMIT_HASH})"
+        textVersion?.text = versionString
+        textAboutVersion?.text = "Version ${BuildConfig.VERSION_NAME}"
+        textAboutCommit?.text = "Commit: ${BuildConfig.COMMIT_HASH}"
 
         btnUpdates?.setOnClickListener {
             UpdateChecker().apply {
@@ -97,14 +303,18 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
         }
     }
 
-    private fun setupRepoButton() {
-        findViewById<View>(R.id.btn_open_repo)?.setOnClickListener {
+    private fun setupRepoButtons() {
+        val openRepo = {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/sheikhmehraann/speedrevanced"))
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(intent)
         }
+
+        findViewById<View>(R.id.btn_open_repo)?.setOnClickListener { openRepo() }
+        findViewById<View>(R.id.btn_home_repo)?.setOnClickListener { openRepo() }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun populateAppList() {
         val container = findViewById<LinearLayout>(R.id.container_apps) ?: return
         container.removeAllViews()
@@ -113,7 +323,15 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
         var totalPatches = 0
         var totalActive = 0
 
-        for ((index, appInfo) in appPatchConfigurations.withIndex()) {
+        val filteredApps = if (searchQuery.isEmpty()) {
+            appPatchConfigurations
+        } else {
+            appPatchConfigurations.filter {
+                it.appName.lowercase().contains(searchQuery) || it.packageName.lowercase().contains(searchQuery)
+            }
+        }
+
+        for ((index, appInfo) in filteredApps.withIndex()) {
             val itemView = inflater.inflate(R.layout.ksu_app_item, container, false)
             val iconView = itemView.findViewById<ImageView>(R.id.app_item_icon)
             val avatarView = itemView.findViewById<TextView>(R.id.app_item_avatar)
@@ -160,7 +378,7 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
 
             container.addView(itemView)
 
-            if (index < appPatchConfigurations.size - 1) {
+            if (index < filteredApps.size - 1) {
                 val indentPx = (70 * resources.displayMetrics.density).toInt()
                 val endMarginPx = (16 * resources.displayMetrics.density).toInt()
                 val divider = View(this).apply {
@@ -177,7 +395,7 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
         }
 
         // Update metrics
-        findViewById<TextView>(R.id.metric_apps_count)?.text = "${appPatchConfigurations.size} Configured"
+        findViewById<TextView>(R.id.metric_apps_count)?.text = "${appPatchConfigurations.size} Apps"
         findViewById<TextView>(R.id.metric_patches_count)?.text = "$totalPatches Total"
     }
 
@@ -235,6 +453,10 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+        if (currentTab != TAB_HOME) {
+            switchTab(TAB_HOME)
+            return
+        }
         finishAndRemoveTask()
         exitProcess(0)
     }
