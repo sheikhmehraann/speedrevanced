@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package io.github.speedrevanced.activity
 
 import android.app.Activity
@@ -9,18 +7,14 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.preference.Preference
-import android.preference.PreferenceCategory
-import android.preference.PreferenceFragment
-import android.preference.SwitchPreference
-import android.text.format.DateUtils
-import android.view.Menu
-import android.view.MenuItem
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.LinearLayout
+import android.widget.Switch
+import android.widget.TextView
 import android.window.OnBackInvokedDispatcher
 import app.morphe.extension.shared.Utils
-import app.morphe.extension.shared.settings.preference.about.MorpheAboutPreference
 import io.github.libxposed.service.XposedService
-import io.github.speedrevanced.AppPatchInfo
 import io.github.speedrevanced.BuildConfig
 import io.github.speedrevanced.R
 import io.github.speedrevanced.appPatchConfigurations
@@ -30,7 +24,6 @@ import kotlin.system.exitProcess
 class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
 
     private var mService: XposedService? = null
-    private lateinit var aboutPreference: MorpheAboutPreference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,30 +35,113 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
             }
         }
         setContentView(R.layout.activity_settings)
-        actionBar?.setDisplayShowHomeEnabled(true)
-
         Utils.setContext(this)
-        aboutPreference = MorpheAboutPreference(this).apply {
-            setTitle(R.string.about_title)
-        }
 
-        val badge = findViewById<android.widget.TextView>(R.id.speed_status_badge)
-        if (badge != null) {
-            badge.setOnClickListener {
-                try {
-                    val intent = packageManager.getLaunchIntentForPackage("org.lsposed.manager")
-                    if (intent != null) startActivity(intent)
-                    else Utils.showToastLong("LSPosed Manager not found")
-                } catch (_: Throwable) {
-                    Utils.showToastLong("Unable to launch LSPosed Manager")
-                }
+        setupHeader()
+        setupHideIconSwitch()
+        setupUpdateChecker()
+        setupRepoButton()
+        populateAppList()
+    }
+
+    private fun setupHeader() {
+        val badge = findViewById<TextView>(R.id.speed_status_badge)
+        badge?.setOnClickListener {
+            try {
+                val intent = packageManager.getLaunchIntentForPackage("org.lsposed.manager")
+                if (intent != null) startActivity(intent)
+                else Utils.showToastLong("LSPosed Manager not found")
+            } catch (_: Throwable) {
+                Utils.showToastLong("Unable to open LSPosed Manager")
             }
         }
+    }
 
-        if (savedInstanceState != null) return
+    private fun setupHideIconSwitch() {
+        val switchHide = findViewById<Switch>(R.id.switch_hide_icon) ?: return
+        val aliasName = ComponentName(this, "$packageName.activity.SettingsActivityAlias")
 
-        fragmentManager.beginTransaction().replace(R.id.settings_container, SettingsFragment())
-            .commit()
+        val currentState = packageManager.getComponentEnabledSetting(aliasName)
+        switchHide.isChecked = (currentState == PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
+
+        switchHide.setOnCheckedChangeListener { _, isChecked ->
+            val newState = if (isChecked) {
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+            } else {
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+            }
+            packageManager.setComponentEnabledSetting(
+                aliasName,
+                newState,
+                PackageManager.DONT_KILL_APP
+            )
+            if (isChecked) {
+                Utils.showToastLong("Icon hidden. Remember to disable 'Force apps to show launcher icons' in LSPosed if icon remains.")
+            } else {
+                Utils.showToastLong("Icon unhidden.")
+            }
+        }
+    }
+
+    private fun setupUpdateChecker() {
+        val btnUpdates = findViewById<View>(R.id.btn_check_updates)
+        val textVersion = findViewById<TextView>(R.id.text_version_info)
+        textVersion?.text = "Version: ${BuildConfig.VERSION_NAME} (${BuildConfig.COMMIT_HASH})"
+
+        btnUpdates?.setOnClickListener {
+            UpdateChecker().apply {
+                setActivity(this@SettingsActivity)
+                checkUpdate(silent = false)
+            }
+        }
+    }
+
+    private fun setupRepoButton() {
+        findViewById<View>(R.id.btn_open_repo)?.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/sheikhmehraann/speedrevanced"))
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+        }
+    }
+
+    private fun populateAppList() {
+        val container = findViewById<LinearLayout>(R.id.container_apps) ?: return
+        container.removeAllViews()
+        val inflater = LayoutInflater.from(this)
+
+        for ((index, appInfo) in appPatchConfigurations.withIndex()) {
+            val itemView = inflater.inflate(R.layout.ksu_app_item, container, false)
+            val titleView = itemView.findViewById<TextView>(R.id.app_item_title)
+            val pkgView = itemView.findViewById<TextView>(R.id.app_item_pkg)
+            val countView = itemView.findViewById<TextView>(R.id.app_item_count)
+
+            titleView.text = appInfo.appName
+            pkgView.text = appInfo.packageName
+            val activePatches = appInfo.patches.count { it.name.isNotEmpty() && !it.name.startsWith("<") }
+            countView.text = "$activePatches Patches"
+
+            itemView.setOnClickListener {
+                val intent = Intent(this, AppPatchSettingsActivity::class.java).apply {
+                    putExtra(AppPatchSettingsActivity.ARGUMENT_APP_NAME, appInfo.appName)
+                }
+                startActivity(intent)
+            }
+
+            container.addView(itemView)
+
+            if (index < appPatchConfigurations.size - 1) {
+                val divider = View(this).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        1
+                    ).apply {
+                        setMargins(20, 0, 20, 0)
+                    }
+                    setBackgroundColor(getColor(R.color.ksu_card_stroke))
+                }
+                container.addView(divider)
+            }
+        }
     }
 
     override fun onStart() {
@@ -81,72 +157,17 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
     override fun onServiceStateChanged(service: XposedService?) {
         mService = service
         runOnUiThread {
-            val badge = findViewById<android.widget.TextView>(R.id.speed_status_badge)
-            if (badge != null) {
-                if (service != null) {
-                    badge.text = "LSPosed Active"
-                    badge.setTextColor(getColor(R.color.speed_accent))
-                } else {
-                    badge.text = "Module Inactive"
-                    badge.setTextColor(getColor(R.color.speed_text_muted))
-                }
+            val badge = findViewById<TextView>(R.id.speed_status_badge)
+            val textWorkingMode = findViewById<TextView>(R.id.text_working_mode)
+            if (service != null) {
+                badge?.text = "Active"
+                badge?.setTextColor(getColor(R.color.ksu_accent))
+                textWorkingMode?.text = "LSPosed System Hook Active"
+            } else {
+                badge?.text = "Inactive"
+                badge?.setTextColor(getColor(R.color.ksu_text_muted))
+                textWorkingMode?.text = "Module Inactive (Enable in LSPosed Manager)"
             }
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.xp_settings_menu, menu)
-        menu.findItem(R.id.menu_disable_auto_check).isVisible = false
-        return true
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        val aliasName = ComponentName(this, SettingsActivity::class.java.name + "Alias")
-        menu.findItem(R.id.menu_hide_icon).isChecked =
-            packageManager.getComponentEnabledSetting(aliasName) == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-
-        val menuDisableAutoCheck = menu.findItem(R.id.menu_disable_auto_check)
-        try {
-            val prefs = mService!!.getRemotePreferences("prefs")
-            menuDisableAutoCheck.isChecked =
-                prefs.getBoolean("disable_auto_check_update", false)
-            menuDisableAutoCheck.isVisible = true
-        } catch (_: Throwable) {
-            menuDisableAutoCheck.isVisible = false
-        }
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.menu_about -> {
-                aboutPreference.onPreferenceClickListener?.onPreferenceClick(aboutPreference)
-                true
-            }
-
-            R.id.menu_hide_icon -> {
-                val newChecked = !item.isChecked
-                item.isChecked = newChecked
-                val aliasName = ComponentName(this, SettingsActivity::class.java.name + "Alias")
-                val status = if (newChecked) PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-                else PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                packageManager.setComponentEnabledSetting(
-                    aliasName,
-                    status,
-                    PackageManager.DONT_KILL_APP
-                )
-                true
-            }
-
-            R.id.menu_disable_auto_check -> {
-                val newChecked = !item.isChecked
-                item.isChecked = newChecked
-                mService!!.getRemotePreferences("prefs")
-                    .edit().putBoolean("disable_auto_check_update", newChecked).apply()
-                true
-            }
-
-            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -154,158 +175,5 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
     override fun onBackPressed() {
         finishAndRemoveTask()
         exitProcess(0)
-    }
-
-    @Suppress("OVERRIDE_DEPRECATION")
-    class SettingsFragment : PreferenceFragment(), SettingApplication.ServiceStateListener {
-        private var mService: XposedService? = null
-
-        private var offPreference: Preference? = null
-        private var onCategory: PreferenceCategory? = null
-
-        fun AppPatchInfo.getPreference(): Preference {
-            return Preference(context).apply {
-                title = appName
-                key = appName
-                intent = Intent(context, AppPatchSettingsActivity::class.java).apply {
-                    putExtra(AppPatchSettingsActivity.ARGUMENT_APP_NAME, appName)
-                }
-            }
-        }
-
-        @Deprecated("Deprecated in Java")
-        override fun onCreate(savedInstanceState: Bundle?) {
-            super.onCreate(savedInstanceState)
-
-            val rootScreen = preferenceManager.createPreferenceScreen(context)
-            preferenceScreen = rootScreen
-
-            Preference(context).apply {
-                setSummary(R.string.slogan_summary)
-                isEnabled = false
-                rootScreen.addPreference(this)
-            }
-
-            Utils.setContext(context)
-
-            Preference(context).apply {
-                summary =
-                    "Speed Revanced - High performance runtime patcher powered by Morphe & ReVanced."
-                intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/sheikhmehraann/speedrevanced"))
-                rootScreen.addPreference(this)
-            }
-
-            Preference(context).apply {
-                setTitle(R.string.faq_title)
-                intent = Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse("https://github.com/sheikhmehraann/speedrevanced#readme")
-                )
-                rootScreen.addPreference(this)
-            }
-
-            addPreferencesFromResource(R.xml.license_prefs)
-
-            val aliasName = ComponentName(context, SettingsActivity::class.java.name + "Alias")
-            val isHidden = context.packageManager.getComponentEnabledSetting(aliasName) == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-            SwitchPreference(context).apply {
-                setTitle(R.string.hide_icon_title)
-                setSummary(R.string.hide_icon_summary)
-                isChecked = isHidden
-                setOnPreferenceChangeListener { _, newValue ->
-                    val hide = newValue as Boolean
-                    val status = if (hide) PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-                    else PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                    context.packageManager.setComponentEnabledSetting(
-                        aliasName,
-                        status,
-                        PackageManager.DONT_KILL_APP
-                    )
-                    true
-                }
-                rootScreen.addPreference(this)
-            }
-
-            Preference(context).apply {
-                setTitle(R.string.check_for_update_title)
-                summary =
-                    """Current version: ${BuildConfig.VERSION_NAME} (${BuildConfig.COMMIT_HASH}) ${BuildConfig.BUILD_TYPE}
-                       |Build Date: ${DateUtils.getRelativeTimeSpanString(BuildConfig.COMMIT_DATE * 1000)}""".trimMargin()
-                setOnPreferenceClickListener {
-                    UpdateChecker().apply {
-                        setActivity(activity)
-                        checkUpdate(silent = false)
-                    }
-                    true
-                }
-                rootScreen.addPreference(this)
-            }
-            UpdateChecker().apply {
-                setActivity(activity)
-                autoCheckUpdate()
-            }
-
-            updateDynamicUI(false)
-        }
-
-        fun updateDynamicUI(on: Boolean) {
-            val rootScreen = preferenceScreen ?: return
-            if (onCategory != null) rootScreen.removePreference(onCategory)
-            if (offPreference != null) rootScreen.removePreference(offPreference)
-
-            if (!on) {
-                offPreference = Preference(context).apply {
-                    setSummary(R.string.module_not_activated_summary)
-                    isEnabled = false
-                    rootScreen.addPreference(this)
-                }
-            } else {
-                onCategory = PreferenceCategory(context).apply {
-                    setTitle(R.string.patch_selection)
-
-                    rootScreen.addPreference(this)
-
-                    this.addPreference(Preference(context).apply {
-                        setSummary(R.string.force_stop_to_apply_summary)
-                        isEnabled = false
-                    })
-
-                    for (appPatchInfo in appPatchConfigurations) {
-                        this.addPreference(appPatchInfo.getPreference())
-                    }
-                }
-            }
-        }
-
-        override fun onStart() {
-            super.onStart()
-            SettingApplication.addServiceStateListener(this, true)
-        }
-
-        override fun onStop() {
-            SettingApplication.removeServiceStateListener(this)
-            super.onStop()
-        }
-
-        override fun onServiceStateChanged(service: XposedService?) {
-            mService = service
-
-            activity?.runOnUiThread {
-                if (service == null) {
-                    updateDynamicUI(false)
-                    return@runOnUiThread
-                }
-
-                val isModuleActivated: Boolean = try {
-                    service.getRemotePreferences("prefs")
-                    service.apiVersion
-                    true
-                } catch (_: Throwable) {
-                    false
-                }
-
-                updateDynamicUI(isModuleActivated)
-            }
-        }
     }
 }

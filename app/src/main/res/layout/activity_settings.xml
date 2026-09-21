@@ -2,62 +2,260 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/speed_bg_dark"
+    android:background="@color/ksu_bg"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <!-- Top Speed Revanced Action Header -->
+    <!-- Top App Bar in KernelSU / SukiSU style -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/speed_card_dark"
+        android:background="@color/ksu_surface"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:paddingStart="20dp"
-        android:paddingTop="20dp"
+        android:paddingTop="18dp"
         android:paddingEnd="20dp"
-        android:paddingBottom="16dp"
-        android:orientation="vertical">
+        android:paddingBottom="18dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Speed Revanced"
+                android:textColor="@color/ksu_text_primary"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="LSPosed Engine"
+                android:textColor="@color/ksu_text_secondary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/speed_status_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ksu_pill_bg"
+            android:clickable="true"
+            android:focusable="true"
+            android:text="Active"
+            android:textColor="@color/ksu_accent"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <TextView
-                android:layout_width="0dp"
+            <!-- Card 1: System & Working Mode (KernelSU Style) -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Speed Revanced"
-                android:textColor="@color/speed_text_primary"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.02" />
+                android:background="@drawable/ksu_card_bg"
+                android:orientation="vertical"
+                android:padding="16dp">
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Working Mode"
+                    android:textColor="@color/ksu_text_primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/text_working_mode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="LSPosed (Zygisk / Riru) System Hook"
+                    android:textColor="@color/ksu_text_secondary"
+                    android:textSize="13sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@color/ksu_card_stroke" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Hide from Launcher"
+                            android:textColor="@color/ksu_text_primary"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Removes app icon from launcher and app drawer"
+                            android:textColor="@color/ksu_text_muted"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <Switch
+                        android:id="@+id/switch_hide_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@color/ksu_card_stroke" />
+
+                <LinearLayout
+                    android:id="@+id/btn_check_updates"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Check for Updates"
+                            android:textColor="@color/ksu_text_primary"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/text_version_info"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Current: 2.0.109"
+                            android:textColor="@color/ksu_text_muted"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Check"
+                        android:textColor="@color/ksu_accent"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Card 2: Modules & Target Applications -->
             <TextView
-                android:id="@+id/speed_status_badge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/speed_badge_bg"
-                android:text="LSPosed Active"
-                android:textColor="@color/speed_accent"
-                android:textSize="11sp"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="8dp"
+                android:text="Configured Applications"
+                android:textColor="@color/ksu_text_secondary"
+                android:textSize="13sp"
                 android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/container_apps"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ksu_card_bg"
+                android:orientation="vertical"
+                android:padding="8dp" />
+
+            <!-- Card 3: Information & Repository -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="8dp"
+                android:text="Repository"
+                android:textColor="@color/ksu_text_secondary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/btn_open_repo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ksu_card_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="GitHub Repository"
+                        android:textColor="@color/ksu_text_primary"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="sheikhmehraann/speedrevanced"
+                        android:textColor="@color/ksu_text_muted"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Open"
+                    android:textColor="@color/ksu_accent"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
         </LinearLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="High performance bytecode patches for YouTube, YT Music and Reddit"
-            android:textColor="@color/speed_text_secondary"
-            android:textSize="12sp" />
-    </LinearLayout>
-
-    <!-- Main Content Container for Settings/Patches -->
-    <FrameLayout
-        android:id="@+id/settings_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/speed_bg_dark" />
+    </ScrollView>
 
 </LinearLayout>

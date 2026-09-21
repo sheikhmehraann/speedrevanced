@@ -1,19 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="MainTheme" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="p">false</item>
-        <item name="android:colorAccent">#00E5FF</item>
-        <item name="android:colorPrimary">#00E5FF</item>
-        <item name="android:colorPrimaryDark">#0091EA</item>
+        <item name="android:colorAccent">@color/ksu_accent</item>
+        <item name="android:colorPrimary">@color/ksu_surface</item>
+        <item name="android:colorPrimaryDark">@color/ksu_bg</item>
         <item name="android:fitsSystemWindows">true</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">@color/ksu_bg</item>
+        <item name="android:navigationBarColor">@color/ksu_bg</item>
+        <item name="android:statusBarColor">@color/ksu_surface</item>
 
-        <item name="android:textColorPrimary">@android:color/primary_text_dark_nodisable</item>
-        <item name="android:textColorSecondary">@android:color/secondary_text_dark_nodisable</item>
+        <item name="android:textColorPrimary">@color/ksu_text_primary</item>
+        <item name="android:textColorSecondary">@color/ksu_text_secondary</item>
+    </style>
+
+    <style name="SettingsTheme" parent="android:Theme.DeviceDefault.Settings">
+        <item name="android:fitsSystemWindows">true</item>
+        <item name="android:singleLineTitle">false</item>
+        <item name="android:windowBackground">@color/ksu_bg</item>
+        <item name="android:colorAccent">@color/ksu_accent</item>
+        <item name="android:listDivider">@null</item>
     </style>
 
 </resources>

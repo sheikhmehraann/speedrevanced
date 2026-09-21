@@ -1,15 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="speed_primary">#FF0D47A1</color>
-    <color name="speed_primary_dark">#FF0A2463</color>
-    <color name="speed_accent">#FF00E5FF</color>
-    <color name="speed_bg_dark">#FF0F172A</color>
-    <color name="speed_card_dark">#FF1E293B</color>
-    <color name="speed_card_stroke">#FF334155</color>
-    <color name="speed_text_primary">#FFF8FAFC</color>
-    <color name="speed_text_secondary">#FF94A3B8</color>
-    <color name="speed_text_muted">#FF64748B</color>
-    <color name="speed_badge_bg">#1A00E5FF</color>
+    <!-- KernelSU / SukiSU Dark Palette -->
+    <color name="ksu_bg">#FF121212</color>
+    <color name="ksu_surface">#FF1E1E1E</color>
+    <color name="ksu_surface_variant">#FF2A2A2A</color>
+    <color name="ksu_card">#FF242424</color>
+    <color name="ksu_card_stroke">#FF333333</color>
+    
+    <!-- SukiSU Crimson / Violet Accent or KSU Emerald Green -->
+    <color name="ksu_accent">#FF4CAF50</color>
+    <color name="ksu_accent_container">#1A4CAF50</color>
+    <color name="ksu_accent_glow">#334CAF50</color>
+    <color name="ksu_warning">#FFFF9800</color>
+    <color name="ksu_error">#FFF44336</color>
+
+    <color name="ksu_text_primary">#FFF5F5F5</color>
+    <color name="ksu_text_secondary">#FFAAAAAA</color>
+    <color name="ksu_text_muted">#FF707070</color>
+
+    <!-- Legacy compatibility mappings -->
+    <color name="speed_primary">#FF1E1E1E</color>
+    <color name="speed_primary_dark">#FF121212</color>
+    <color name="speed_accent">#FF4CAF50</color>
+    <color name="speed_bg_dark">#FF121212</color>
+    <color name="speed_card_dark">#FF1E1E1E</color>
+    <color name="speed_card_stroke">#FF333333</color>
+    <color name="speed_text_primary">#FFF5F5F5</color>
+    <color name="speed_text_secondary">#FFAAAAAA</color>
+    <color name="speed_text_muted">#FF707070</color>
+    <color name="speed_badge_bg">#1A4CAF50</color>
 
     <color name="skip_ad_button_foreground_color">#ffff</color>
     <color name="yt_white1">#FFFFFFFF</color>
