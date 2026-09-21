@@ -2,34 +2,42 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/speed_bg_dark"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?android:attr/colorPrimary"
+        android:background="@color/speed_card_dark"
         android:paddingStart="20dp"
-        android:paddingTop="16dp"
+        android:paddingTop="18dp"
         android:paddingEnd="20dp"
         android:paddingBottom="16dp"
-        android:elevation="4dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/patch_header_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="⚡ Speed Revanced Patches"
-            android:textColor="#FFFFFFFF"
-            android:textSize="18sp"
+            android:text="Application Patches"
+            android:textColor="@color/speed_text_primary"
+            android:textSize="20sp"
             android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Configure active hooks and bytecode modifications"
+            android:textColor="@color/speed_text_secondary"
+            android:textSize="12sp" />
     </LinearLayout>
 
     <FrameLayout
         android:id="@+id/app_patch_settings_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:background="@color/speed_bg_dark" />
 
 </LinearLayout>

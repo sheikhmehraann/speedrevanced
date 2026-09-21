@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="speed_primary">#FF0D47A1</color>
+    <color name="speed_primary_dark">#FF0A2463</color>
+    <color name="speed_accent">#FF00E5FF</color>
+    <color name="speed_bg_dark">#FF0F172A</color>
+    <color name="speed_card_dark">#FF1E293B</color>
+    <color name="speed_card_stroke">#FF334155</color>
+    <color name="speed_text_primary">#FFF8FAFC</color>
+    <color name="speed_text_secondary">#FF94A3B8</color>
+    <color name="speed_text_muted">#FF64748B</color>
+    <color name="speed_badge_bg">#1A00E5FF</color>
+
     <color name="skip_ad_button_foreground_color">#ffff</color>
-    <!-- YouTube colors referenced by Morphe settings icons -->
     <color name="yt_white1">#FFFFFFFF</color>
     <color name="yt_black0">#FF000000</color>
 </resources>

@@ -49,6 +49,19 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
             setTitle(R.string.about_title)
         }
 
+        val badge = findViewById<android.widget.TextView>(R.id.speed_status_badge)
+        if (badge != null) {
+            badge.setOnClickListener {
+                try {
+                    val intent = packageManager.getLaunchIntentForPackage("org.lsposed.manager")
+                    if (intent != null) startActivity(intent)
+                    else Utils.showToastLong("LSPosed Manager not found")
+                } catch (_: Throwable) {
+                    Utils.showToastLong("Unable to launch LSPosed Manager")
+                }
+            }
+        }
+
         if (savedInstanceState != null) return
 
         fragmentManager.beginTransaction().replace(R.id.settings_container, SettingsFragment())
@@ -67,6 +80,18 @@ class SettingsActivity : Activity(), SettingApplication.ServiceStateListener {
 
     override fun onServiceStateChanged(service: XposedService?) {
         mService = service
+        runOnUiThread {
+            val badge = findViewById<android.widget.TextView>(R.id.speed_status_badge)
+            if (badge != null) {
+                if (service != null) {
+                    badge.text = "LSPosed Active"
+                    badge.setTextColor(getColor(R.color.speed_accent))
+                } else {
+                    badge.text = "Module Inactive"
+                    badge.setTextColor(getColor(R.color.speed_text_muted))
+                }
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

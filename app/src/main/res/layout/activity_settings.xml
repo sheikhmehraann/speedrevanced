@@ -2,43 +2,62 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/speed_bg_dark"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <!-- Speed Revanced Custom Header Banner -->
+    <!-- Top Speed Revanced Action Header -->
     <LinearLayout
-        android:id="@+id/speed_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?android:attr/colorPrimary"
-        android:paddingStart="24dp"
+        android:background="@color/speed_card_dark"
+        android:paddingStart="20dp"
         android:paddingTop="20dp"
-        android:paddingEnd="24dp"
-        android:paddingBottom="20dp"
-        android:elevation="4dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="16dp"
         android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="⚡ SPEED REVANCED"
-            android:textColor="#FFFFFFFF"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.05" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Speed Revanced"
+                android:textColor="@color/speed_text_primary"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.02" />
+
+            <TextView
+                android:id="@+id/speed_status_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/speed_badge_bg"
+                android:text="LSPosed Active"
+                android:textColor="@color/speed_accent"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="LSPosed Module • Custom Playback • Ad-Free Runtime"
-            android:textColor="#CCFFFFFF"
-            android:textSize="13sp" />
+            android:text="High performance bytecode patches for YouTube, YT Music and Reddit"
+            android:textColor="@color/speed_text_secondary"
+            android:textSize="12sp" />
     </LinearLayout>
 
+    <!-- Main Content Container for Settings/Patches -->
     <FrameLayout
         android:id="@+id/settings_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:background="@color/speed_bg_dark" />
 
 </LinearLayout>

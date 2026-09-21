@@ -2,18 +2,19 @@
 
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="MainTheme" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="p">true</item>
-        <item name="android:colorAccent">#FF0055FF</item>
-        <item name="android:colorPrimary">#FF0055FF</item>
-        <item name="android:colorPrimaryDark">#FF0033AA</item>
+    <style name="MainTheme" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="p">false</item>
+        <item name="android:colorAccent">@color/speed_accent</item>
+        <item name="android:colorPrimary">@color/speed_primary</item>
+        <item name="android:colorPrimaryDark">@color/speed_primary_dark</item>
         <item name="android:fitsSystemWindows">true</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">@color/speed_bg_dark</item>
+        <item name="android:navigationBarColor">@color/speed_bg_dark</item>
+        <item name="android:statusBarColor">@color/speed_card_dark</item>
 
-        <item name="android:textColorPrimary">@android:color/primary_text_light_nodisable</item>
-        <item name="android:textColorSecondary">@android:color/secondary_text_light_nodisable</item>
+        <item name="android:textColorPrimary">@color/speed_text_primary</item>
+        <item name="android:textColorSecondary">@color/speed_text_secondary</item>
     </style>
 
     <style name="ListDividerNull">
@@ -23,7 +24,8 @@
     <style name="SettingsTheme" parent="android:Theme.DeviceDefault.Settings">
         <item name="android:fitsSystemWindows">true</item>
         <item name="android:singleLineTitle">false</item>
-
+        <item name="android:windowBackground">@color/speed_bg_dark</item>
+        <item name="android:colorAccent">@color/speed_accent</item>
         <item name="android:listDivider">@null</item>
     </style>
 
