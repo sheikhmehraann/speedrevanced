@@ -6,7 +6,8 @@ import java.lang.reflect.Field
 
 val HideSuggestedFeedItems = patch(
     name = "Hide suggested feed items",
-    description = "Removes suggested posts, clips netego, suggested users, and cross-promo units from the feed."
+    description = "Removes suggested posts, clips netego, suggested users, and cross-promo units from the feed.",
+    use = false
 ) {
     runCatching {
         ::feedItemParserFingerprint.hookMethod(object : XC_MethodHook() {
