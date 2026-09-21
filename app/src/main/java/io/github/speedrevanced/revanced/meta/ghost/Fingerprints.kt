@@ -1,28 +1,31 @@
 package io.github.speedrevanced.revanced.meta.ghost
 
 import io.github.speedrevanced.morphe.findMethodDirect
+import io.github.speedrevanced.morphe.returns
 import io.github.speedrevanced.morphe.strings
 
 val storySeenFingerprint = findMethodDirect {
+    val r0 = findMethod {
+        matcher {
+            strings("media/seen/")
+            returns("void")
+        }
+    }
+    if (r0.isNotEmpty()) return@findMethodDirect r0.first()
+
     val r1 = findMethod {
         matcher {
-            strings("media/seen/?reel=%s&live_vod=0")
+            strings("media/seen")
+            returns("void")
         }
     }
     if (r1.isNotEmpty()) return@findMethodDirect r1.first()
 
-    val r2 = findMethod {
-        matcher {
-            strings("media/seen/")
-        }
-    }
-    if (r2.isNotEmpty()) return@findMethodDirect r2.first()
-
     findMethod {
         matcher {
-            strings("media/seen")
+            strings("media/seen/?reel=%s&live_vod=0")
         }
-    }.firstOrNull() ?: r2.firstOrNull() ?: r1.firstOrNull() ?: error("storySeenFingerprint not found")
+    }.firstOrNull() ?: error("storySeenFingerprint not found")
 }
 
 val dmSeenFingerprint = findMethodDirect {

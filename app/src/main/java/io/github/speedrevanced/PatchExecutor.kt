@@ -166,7 +166,7 @@ class PatchExecutor(
     private val moduleRel = BuildConfig.COMMIT_HASH
     private var cache = SharedPrefCache(appContext)
     private var _dexkit: DexKitCacheBridge.RecyclableBridge? = null
-    private val dexkit: DexKitCacheBridge.RecyclableBridge
+    val dexkit: DexKitCacheBridge.RecyclableBridge
         get() {
             if (_dexkit == null) {
                 System.loadLibrary("dexkit")
