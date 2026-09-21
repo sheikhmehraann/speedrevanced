@@ -26,7 +26,7 @@ import app.morphe.extension.youtube.swipecontrols.misc.toPoint
 class ClassicSwipeController(
     private val controller: SwipeControlsHostActivity,
 ) : BaseGestureController(controller),
-    PlayerControlsVisibilityObserver by PlayerControlsVisibilityObserverImpl(controller.activity) {
+    PlayerControlsVisibilityObserver by PlayerControlsVisibilityObserverImpl(controller) {
     /**
      * The last event captured in [onDown].
      */

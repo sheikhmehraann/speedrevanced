@@ -12,8 +12,6 @@ package app.morphe.extension.shared.settings.preference;
 
 import static app.morphe.extension.shared.StringRef.str;
 
-import static io.github.nexalloy.morphe.shared.settings.PreferencesKt.getPreferences;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
@@ -88,8 +86,6 @@ import app.morphe.extension.shared.settings.preference.about.MorpheAboutPreferen
 import app.morphe.extension.shared.theme.ThemeUtils;
 import app.morphe.extension.shared.ui.CustomDialog;
 import app.morphe.extension.shared.ui.Dim;
-
-import io.github.nexalloy.morphe.shared.misc.settings.preference.BasePreference;
 
 @SuppressWarnings("deprecation")
 public abstract class AbstractPreferenceFragment extends PreferenceFragment {
@@ -338,19 +334,6 @@ public abstract class AbstractPreferenceFragment extends PreferenceFragment {
      * so all app specific {@link Setting} instances are loaded before this method returns.
      */
     protected void initialize() {
-        //region rewrite
-        Activity context = getActivity();
-        PreferenceManager manager = getPreferenceManager();
-        manager.setSharedPreferencesName(Setting.preferences.name);
-        PreferenceScreen screen = manager.createPreferenceScreen(context);
-        setPreferenceScreen(screen);
-        var preferencesBuilder = getPreferences();
-        preferencesBuilder.forEach(builder -> screen.addPreference(builder.build(context, manager)));
-        preferencesBuilder.forEach(BasePreference::onAttachedToHierarchy);
-        screen.setKey("revanced_settings_root_screen_sort_by_key");
-        //endregion
-
-/*
         // Must use utils modified language context if language override is active.
         if (!BaseSettings.MORPHE_LANGUAGE.isSetToDefault()) {
             ResourceUtils.useActivityContextIfAvailable = false;
@@ -370,7 +353,6 @@ public abstract class AbstractPreferenceFragment extends PreferenceFragment {
         addPreferencesFromResource(identifier);
 
         PreferenceScreen screen = getPreferenceScreen();
-*/
         sortPreferenceGroups(screen);
         Utils.setPreferenceTitlesToMultiLineIfNeeded(screen);
     }

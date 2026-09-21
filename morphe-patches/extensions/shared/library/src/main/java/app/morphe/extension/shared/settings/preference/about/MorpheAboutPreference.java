@@ -35,7 +35,6 @@ import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
-import io.github.nexalloy.BuildConfig;
 
 /**
  * Opens a dialog showing official links.
@@ -124,52 +123,6 @@ public class MorpheAboutPreference extends Preference {
 
     private String createDialogHtml(List<WebLink> aboutLinks, @Nullable String currentVersion) {
         StringBuilder html = new StringBuilder(AboutDialogStyle.documentStart());
-
-        //region Add NexAlloy
-        // Header section.
-        html.append("<div class=\"dialog-header\">");
-
-        html.append("<div class=\"app-name\">NexAlloy</div>");
-
-        html.append(String.format("""
-                    <div class="info-card">
-                        <p>Version <i>%s</i></p>
-                    </div>
-                    """,
-                useNonBreakingHyphens(BuildConfig.VERSION_NAME)
-        ));
-
-        html.append("</div>"); // end .dialog-header
-
-        // Links section.
-        html.append("<div class=\"section\">")
-                .append(AboutDialogStyle.sectionTitle(getString("morphe_settings_about_links_header")))
-                .append("<div class=\"settings-group\">");
-
-        var myLinks = new WebLink[]{
-                new WebLink("GitHub", null, "https://github.com/NexAlloy/NexAlloy"),
-                new WebLink("Discord", null, "https://discord.gg/QWUrAA2mKq"),
-                new WebLink("Telegram", null, "https://t.me/ReVancedXposed"),
-                new WebLink("Donate", null, "https://afdian.com/a/ChsBuffer"),
-        };
-
-        // Link buttons with per-URL SVG icons.
-        for (WebLink link : myLinks) {
-            html.append("<a href=\"").append(link.url).append("\" class=\"settings-item\">")
-                    .append("<span class=\"item-icon\">")
-                    .append(AboutDialogStyle.linkIcon(link.url))
-                    .append("</span>")
-                    .append("<div class=\"item-text\"><div class=\"item-title\">")
-                    .append(link.name)
-                    .append("</div></div>")
-                    .append(AboutDialogStyle.chevron())
-                    .append("</a>");
-        }
-
-        html.append("</div>"); // end .links-section
-        html.append("</hr>");
-
-        //endregion
 
         html.append("<div class=\"dialog-header\">");
 
