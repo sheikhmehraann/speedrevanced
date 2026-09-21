@@ -13,10 +13,21 @@ import org.luckypray.dexkit.result.MethodData
 import org.luckypray.dexkit.util.DexSignUtil.getTypeName
 
 fun getTypeNameCompat(it: String): String? {
-    return when {
-        it == "this" -> null
-        it.trimStart('[').startsWith('L') && !it.endsWith(';') -> null
-        else -> getTypeName(it)
+    return when (it) {
+        "boolean" -> "boolean"
+        "byte" -> "byte"
+        "char" -> "char"
+        "short" -> "short"
+        "int" -> "int"
+        "long" -> "long"
+        "float" -> "float"
+        "double" -> "double"
+        "void" -> "void"
+        "this" -> null
+        else -> {
+            if (it.trimStart('[').startsWith('L') && !it.endsWith(';')) null
+            else runCatching { getTypeName(it) }.getOrDefault(it)
+        }
     }
 }
 
