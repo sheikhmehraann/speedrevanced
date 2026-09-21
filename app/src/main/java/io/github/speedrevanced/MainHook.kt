@@ -21,6 +21,11 @@ class MainHook : XposedModule() {
     override fun onPackageReady(param: PackageReadyParam) {
         val patches = patchesByPackage[param.packageName] ?: return
 
+        // Skip secondary background processes (e.g. :fbns, :push) to prevent background wakeups and crashes
+        if (param.processName != param.packageName && !param.processName.endsWith(":main")) {
+            return
+        }
+
         inContext(param) { app ->
             if (isReVancedPatched(param)) {
                 return@inContext

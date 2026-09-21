@@ -19,7 +19,13 @@ val GhostMode = patch(
                 name.contains("sendTyping", ignoreCase = true)) {
                 XposedBridge.hookMethod(method, object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
-                        param.result = null
+                        if (method.returnType == java.lang.Boolean.TYPE || method.returnType == java.lang.Boolean::class.java) {
+                            param.result = false
+                        } else if (method.returnType == java.lang.Integer.TYPE) {
+                            param.result = 0
+                        } else {
+                            param.result = null
+                        }
                     }
                 })
             }

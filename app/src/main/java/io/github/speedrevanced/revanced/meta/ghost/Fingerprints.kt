@@ -15,9 +15,16 @@ val storySeenFingerprint = findMethodDirect {
     }
     if (r1.isNotEmpty()) return@findMethodDirect r1.first()
 
-    findMethod {
+    val r2 = findMethod {
         matcher {
             strings("media/seen/")
+        }
+    }
+    if (r2.isNotEmpty()) return@findMethodDirect r2.first()
+
+    findMethod {
+        matcher {
+            strings("seen")
         }
     }.first()
 }
